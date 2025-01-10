@@ -1,0 +1,129 @@
+#root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.list {
+    flex-grow: 1;
+}
+
+footer, .list {
+    padding: 30px;
+    max-height: 500px;
+}
+
+h1 {
+}
+
+ul {
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    margin-left: 10px;
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+}
+
+li span {
+    flex-grow: 1;
+    display: inline-block;
+}
+input[type=checkbox] {
+    flex-grow: 0;
+    height: 20px;
+    margin-bottom: 10px;
+}
+
+input {
+    flex-grow: 1;
+    height: 0;
+}
+
+input, button {
+    font-size: 20px;
+    border: 2px solid #fff4;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 6px;
+    /*padding: 0;*/
+    width: 40px;
+    background: #0004;
+    line-height: 20px;
+    box-sizing: border-box;
+    /*box-sizing: content-box;*/
+    margin: 0;
+    display: inline-block;
+}
+input:focus {
+    border-color: #08f8;
+    outline: none;
+}
+button {
+    font-size: 20px;
+    background: #036;
+    cursor: pointer;
+    border-radius: 0;
+    border-top: none;
+    /*border-color: #08f8;*/
+}
+button:hover {
+    background: #048;
+}
+button:active {
+    background: #024;
+}
+button.delete {
+    background: #600;
+    border-radius: 0 0 10px 10px;
+}
+button.delete:hover {
+    background: #800;
+}
+button.delete:active {
+    background: #400;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    background: #424;
+    padding: 10px;
+}
+nav button, button.edit {
+    font-size: 1rem;
+    margin: 0;
+    border: none;
+    background: #0004;
+    width: auto;
+    padding: 10px 3px;
+    border-radius: 10px;
+    color: #fffb;
+}
+nav button:hover, button.edit:hover {
+    background: #000;
+    color: #fff;
+}
+nav button:active, button.edit:active {
+    background: #808;
+    color: #fff;
+}
+button.new {
+    border-radius: 10px;
+    border: 2px solid #fff4;
+}
+
+button.edit {
+    margin-top: 10px;
+}
+
+p {
+    color: #fdfe;
+    line-height: 1.2;
+}
+small {
+    opacity: 0.5;
+}
