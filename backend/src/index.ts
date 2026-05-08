@@ -3,6 +3,7 @@ import express from 'express';
 import {WebSocketServer, WebSocket} from 'ws';
 import {createServer} from 'http';
 import {TodoRepo} from "./todoRepo";
+import {mcpRouter} from "./mcp";
 
 const port = process.env.PORT || 3003;
 
@@ -17,6 +18,8 @@ export const boards = new Map<string, Set<WebSocket>>();
 app.get('/api/health', (req, res) =>
     res.send('ok')
 )
+
+app.use('/mcp', mcpRouter);
 
 wss.on('connection', (ws: WebSocket) => {
     console.log('client connected');
