@@ -1,9 +1,12 @@
 import 'dotenv/config';
-import express from 'express';
-import {WebSocketServer, WebSocket} from 'ws';
-import {createServer} from 'http';
-import {TodoRepo} from "./todoRepo";
-import {mcpRouter} from "./mcp";
+import express, { Response } from 'express';
+import { WebSocketServer, WebSocket } from 'ws';
+import { createServer } from 'http';
+import { TodoRepo } from './todoRepo';
+import { mcpRouter } from './mcp';
+import { authRouter, authenticateJWT, verifyToken, AuthRequest } from './authRouter';
+import { BoardRepo } from './boardRepo';
+import { UserRepo } from './userRepo';
 
 const port = process.env.PORT || 3003;
 
@@ -11,18 +14,79 @@ const app = express();
 app.use(express.json());
 
 const server = createServer(app);
-const wss = new WebSocketServer({server});
+const wss = new WebSocketServer({ server });
 
 export const boards = new Map<string, Set<WebSocket>>();
 
-app.get('/api/health', (req, res) =>
-    res.send('ok')
-)
+app.get('/api/health', (_req, res) => res.send('ok'));
 
+app.use('/api/auth', authRouter);
 app.use('/mcp', mcpRouter);
 
+app.post('/api/boards', authenticateJWT, async (req: AuthRequest, res: Response) => {
+    const { boardId } = req.body;
+    const id: string = boardId || crypto.randomUUID();
+    try {
+        await BoardRepo.createBoard(id, req.user!.username);
+        res.json({ boardId: id });
+    } catch (e: any) {
+        res.status(e.statusCode ?? 500).json({ error: e.message });
+    }
+});
+
+app.get('/api/boards', authenticateJWT, async (req: AuthRequest, res: Response) => {
+    const boards = await BoardRepo.getBoardsByUser(req.user!.username);
+    res.json(boards);
+});
+
+app.get('/api/boards/:boardId', async (req: AuthRequest, res: Response) => {
+    const boardId = req.params.boardId as string;
+    const board = await BoardRepo.getBoard(boardId);
+    if (!board) { res.status(404).json({ error: 'Board not found' }); return; }
+
+    const auth = req.headers.authorization;
+    const username = auth?.startsWith('Bearer ')
+        ? verifyToken(auth.slice(7))?.username ?? null
+        : null;
+
+    const canAccess =
+        board.isPublic ||
+        (username && (board.ownerUsername === username || board.memberUsernames.includes(username)));
+
+    if (!canAccess) { res.status(403).json({ error: 'Forbidden' }); return; }
+
+    res.json({
+        ownerUsername: board.ownerUsername,
+        memberUsernames: board.memberUsernames,
+        isPublic: board.isPublic,
+    });
+});
+
+app.post('/api/boards/:boardId/members', authenticateJWT, async (req: AuthRequest, res: Response) => {
+    const boardId = req.params.boardId as string;
+    const board = await BoardRepo.getBoard(boardId);
+    if (!board) { res.status(404).json({ error: 'Board not found' }); return; }
+    if (board.ownerUsername !== req.user!.username) { res.status(403).json({ error: 'Only the owner can add members' }); return; }
+    const { username } = req.body;
+    if (!username) { res.status(400).json({ error: 'username required' }); return; }
+    const user = await UserRepo.findUser(username);
+    if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+    await BoardRepo.addMember(boardId, username);
+    res.json({ ok: true });
+});
+
+app.patch('/api/boards/:boardId/share', authenticateJWT, async (req: AuthRequest, res: Response) => {
+    const boardId = req.params.boardId as string;
+    const board = await BoardRepo.getBoard(boardId);
+    if (!board) { res.status(404).json({ error: 'Board not found' }); return; }
+    if (board.ownerUsername !== req.user!.username) { res.status(403).json({ error: 'Only the owner can change sharing' }); return; }
+    const { isPublic } = req.body;
+    if (typeof isPublic !== 'boolean') { res.status(400).json({ error: 'isPublic (boolean) required' }); return; }
+    await BoardRepo.setPublic(boardId, isPublic);
+    res.json({ ok: true });
+});
+
 wss.on('connection', (ws: WebSocket) => {
-    console.log('client connected');
     let subscribedBoardId: string | undefined;
 
     ws.on('message', async (data) => {
@@ -33,30 +97,40 @@ wss.on('connection', (ws: WebSocket) => {
         } else if (message.type === 'tombstone' && subscribedBoardId) {
             await TodoRepo.saveTombstone(subscribedBoardId, message.id);
         } else if (message.type === 'join') {
-            subscribedBoardId = message.boardId;
-            if (!subscribedBoardId) return;
-            if (!boards.has(subscribedBoardId)) {
-                boards.set(subscribedBoardId, new Set());
+            const boardId: string = message.boardId;
+            if (!boardId) return;
+
+            const board = await BoardRepo.getBoard(boardId);
+            if (board) {
+                const username = message.token ? verifyToken(message.token)?.username : null;
+                const authorized =
+                    board.isPublic ||
+                    (username && (board.ownerUsername === username || board.memberUsernames.includes(username)));
+                if (!authorized) {
+                    ws.send(JSON.stringify({ type: 'error', message: 'unauthorized' }));
+                    ws.close();
+                    return;
+                }
             }
+
+            subscribedBoardId = boardId;
+            if (!boards.has(subscribedBoardId)) boards.set(subscribedBoardId, new Set());
             boards.get(subscribedBoardId)!.add(ws);
             const init = await TodoRepo.getBoardInit(subscribedBoardId);
-            ws.send(JSON.stringify({type: 'init', inserts: init.inserts, tombstones: init.tombstones}));
+            ws.send(JSON.stringify({ type: 'init', inserts: init.inserts, tombstones: init.tombstones }));
         }
     });
 
     ws.on('close', () => {
         if (subscribedBoardId) {
-            const board = boards.get(subscribedBoardId);
-            if (board) {
-                board.delete(ws);
-            }
+            boards.get(subscribedBoardId)?.delete(ws);
         }
-        console.log('client disconnected')
     });
 });
 
 server.listen(port, async () => {
     await TodoRepo.initDb();
     await TodoRepo.watchChanges();
-    console.log(`listening on http://localhost:${port}`)
+    await UserRepo.initUsersDb();
+    console.log(`listening on http://localhost:${port}`);
 });

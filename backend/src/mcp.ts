@@ -5,6 +5,8 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { TodoRepo, ListItem } from './todoRepo';
+import { BoardRepo } from './boardRepo';
+import { verifyToken } from './authRouter';
 
 // Mirrors frontend/src/ListItem.ts — CRDT helpers for ordering and UID generation
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -44,14 +46,56 @@ function toDisplayItem(item: ListItem) {
     return { uid: getUID(item), ...rest };
 }
 
-function createMcpServer(): McpServer {
+// Returns null if access is granted, or an error message string if denied.
+async function checkAccess(boardId: string, username: string | null): Promise<string | null> {
+    const board = await BoardRepo.getBoard(boardId);
+    if (!board) return null; // legacy board with no metadata — open to all
+    if (board.isPublic) return null;
+    if (username && (board.ownerUsername === username || board.memberUsernames.includes(username))) return null;
+    return `Access denied to board "${boardId}"`;
+}
+
+const siteUrl = (process.env.SITE_URL ?? 'http://localhost:3003').replace(/\/$/, '');
+
+function boardUrl(boardId: string) { return `${siteUrl}/board/${boardId}`; }
+
+function createMcpServer(username: string | null): McpServer {
     const server = new McpServer({ name: 'tatetodo', version: '1.0.0' });
+
+    server.tool(
+        'create_board',
+        'Create a new board owned by the authenticated user. Requires authentication.',
+        { boardId: z.string().optional().describe('Board ID to use; omit to generate a random UUID') },
+        async ({ boardId }) => {
+            if (!username) throw new Error('Authentication required to create a board');
+            const id = boardId ?? randomUUID();
+            await BoardRepo.createBoard(id, username);
+            return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId: id, url: boardUrl(id) }, null, 2) }] };
+        }
+    );
+
+    server.tool(
+        'get_board_info',
+        'Get metadata for a board: owner, members, public status, and its URL',
+        { boardId: z.string().describe('The board ID') },
+        async ({ boardId }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
+            const board = await BoardRepo.getBoard(boardId);
+            if (!board) {
+                return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId, url: boardUrl(boardId), note: 'Legacy board — no ownership metadata' }, null, 2) }] };
+            }
+            return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId, url: boardUrl(boardId), ownerUsername: board.ownerUsername, memberUsernames: board.memberUsernames, isPublic: board.isPublic }, null, 2) }] };
+        }
+    );
 
     server.tool(
         'get_board',
         'Get all visible todo items on a board in sorted order',
         { boardId: z.string().describe('The board ID') },
         async ({ boardId }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
             const visible = await getVisible(boardId);
             return { content: [{ type: 'text' as const, text: JSON.stringify(visible.map(toDisplayItem), null, 2) }] };
         }
@@ -67,6 +111,8 @@ function createMcpServer(): McpServer {
             afterUid: z.string().optional().describe('UID of the item to insert after; omit to append at end'),
         },
         async ({ boardId, text, status = false, afterUid }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
             const item: ListItem = { text, status, siteId, version: mcpVersion++, afterId: afterUid };
             await TodoRepo.saveListItem(boardId, item);
             return { content: [{ type: 'text' as const, text: getUID(item) }] };
@@ -83,6 +129,8 @@ function createMcpServer(): McpServer {
             status: z.boolean().optional().describe('New completion status'),
         },
         async ({ boardId, uid, text, status }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
             const { inserts, tombstones } = await TodoRepo.getBoardInit(boardId);
             const dead = new Set(tombstones);
             const sorted = sortItems(inserts).filter(i => !dead.has(getUID(i)));
@@ -113,6 +161,8 @@ function createMcpServer(): McpServer {
             afterUid: z.string().optional().describe('UID of the item to place this after; omit to move to top'),
         },
         async ({ boardId, uid, afterUid }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
             const { inserts, tombstones } = await TodoRepo.getBoardInit(boardId);
             const dead = new Set(tombstones);
             const sorted = sortItems(inserts).filter(i => !dead.has(getUID(i)));
@@ -133,6 +183,8 @@ function createMcpServer(): McpServer {
             uid: z.string().describe('UID of the item to delete (format: siteId:version)'),
         },
         async ({ boardId, uid }) => {
+            const denied = await checkAccess(boardId, username);
+            if (denied) throw new Error(denied);
             await TodoRepo.saveTombstone(boardId, uid);
             return { content: [{ type: 'text' as const, text: 'deleted' }] };
         }
@@ -142,7 +194,10 @@ function createMcpServer(): McpServer {
         'board',
         new ResourceTemplate('board://{boardId}', { list: undefined }),
         async (uri, { boardId }) => {
-            const visible = await getVisible(boardId as string);
+            const id = boardId as string;
+            const denied = await checkAccess(id, username);
+            if (denied) throw new Error(denied);
+            const visible = await getVisible(id);
             return {
                 contents: [{
                     uri: uri.href,
@@ -170,6 +225,9 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Expected initialize request or valid mcp-session-id header' });
         return;
     }
+    const auth = req.headers.authorization;
+    const username = auth?.startsWith('Bearer ') ? verifyToken(auth.slice(7))?.username ?? null : null;
+
     const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
         sessionIdGenerator: () => randomUUID(),
         onsessioninitialized: (id: string) => { sessions.set(id, transport); },
@@ -177,7 +235,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
     transport.onclose = () => {
         if (transport.sessionId) sessions.delete(transport.sessionId);
     };
-    await createMcpServer().connect(transport);
+    await createMcpServer(username).connect(transport);
     await transport.handleRequest(req, res, req.body);
 });
 

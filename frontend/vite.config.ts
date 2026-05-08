@@ -9,7 +9,9 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3003',
         ws: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/mcp': {
+        target: 'http://localhost:3003',
       },
     },
   },
