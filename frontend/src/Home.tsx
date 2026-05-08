@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { FooterText } from "./FooterText.tsx";
 import { useColorScheme } from "./useColorScheme.ts";
 import { useAuth } from "./AuthContext.tsx";
+import { useTranslation } from 'react-i18next';
+import { LangSwitcher } from './LangSwitcher.tsx';
 
 type BoardMeta = { boardId: string; ownerUsername: string; isPublic: boolean; createdAt: string };
 
@@ -20,11 +22,12 @@ async function apiCreateBoard(boardId: string | undefined, token: string): Promi
 export function Home() {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const [writingModeHorizontal, setWritingModeHorizontal] = useState(
-        () => localStorage.getItem('writingModeHorizontal') === 'true'
+        () => localStorage.getItem('writingModeHorizontal') !== 'false'
     );
     const navigate = useNavigate();
     const { scheme, toggle: toggleColorScheme } = useColorScheme();
     const { token, username, logout } = useAuth();
+    const { t } = useTranslation();
     const [boards, setBoards] = useState<BoardMeta[]>([]);
     const [boardError, setBoardError] = useState('');
 
@@ -67,22 +70,22 @@ export function Home() {
     return (
         <main style={{ writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl" }}>
             <nav>
-                <strong>✔︎ やることリスト</strong>
+                <strong>{t('nav.appName')}</strong>
                 {token
-                    ? <span>こんにちは、{username} · <a href="#" onClick={e => { e.preventDefault(); logout(); }}>ログアウト</a></span>
-                    : <span><Link to="/login">ログイン</Link> · <Link to="/register">新規登録</Link></span>
+                    ? <span>{t('nav.hello', { username })}  · <a href="#" onClick={e => { e.preventDefault(); logout(); }}>{ t('nav.logout')}</a></span>
+                    : <span><Link to="/login">{t('nav.login')}</Link> · <Link to="/register">{t('nav.register')}</Link></span>
                 }
             </nav>
 
             {boards.length > 0 && (
                 <article>
-                    <h3>あなたのリスト</h3>
+                    <h3>{t('home.myBoards')}</h3>
                     <ul>
                         {boards.map(b => (
                             <li key={b.boardId} style={{ cursor: 'pointer' }} onClick={() => navigate(`/board/${b.boardId}`)}>
                                 <fieldset>
                                     <input value={b.boardId} readOnly style={{ cursor: 'pointer', flexGrow: 1 }} />
-                                    <button className="secondary" onClick={e => { e.stopPropagation(); navigate(`/board/${b.boardId}`); }}>開く</button>
+                                    <button className="secondary" onClick={e => { e.stopPropagation(); navigate(`/board/${b.boardId}`); }}>{t('home.open')}</button>
                                 </fieldset>
                             </li>
                         ))}
@@ -91,12 +94,12 @@ export function Home() {
             )}
 
             <article>
-                <h3>名前で開くもしくは作成：</h3>
+                <h3>{t('home.openOrCreate')}</h3>
                 <p>
                     <form onSubmit={e => { e.preventDefault(); openOrCreate(); }}>
                         <fieldset>
-                            <input placeholder="リスト名" ref={nameInputRef} />
-                            <button type="submit">リストを開く</button>
+                            <input placeholder={t('home.listName')} ref={nameInputRef} />
+                            <button type="submit">{t('home.openList')}</button>
                         </fieldset>
                     </form>
                 </p>
@@ -104,24 +107,24 @@ export function Home() {
             </article>
 
             <article>
-                <h3>名前をランダムで作成する（UUID秘密）：</h3>
-                <p><button onClick={createRandom}>リストを作成</button></p>
+                <h3>{t('home.createRandom')}</h3>
+                <p><button onClick={createRandom}>{t('home.createList')}</button></p>
             </article>
 
-            <article style={{ writingMode: "horizontal-tb", overflowY: "auto", minWidth: "460px" }}>
-                <h3>MCPサーバーの設定：</h3>
-                <p>AIエージェント（Claude等）からリストを読み書きできます。公開ボードは認証不要です。プライベートボードにアクセスするにはトークンが必要です。</p>
+            <article style={{ writingMode: "horizontal-tb", overflowY: "auto", flexShrink: 0, width: writingModeHorizontal ? "auto" : "400px" }}>
+                <h3>{t('mcp.title')}</h3>
+                <p>{t('mcp.description')}</p>
                 {token && (
-                    <p><small>ログイン中のトークン（コピーして下記コマンドに使用）：<br /><code style={{ wordBreak: 'break-all' }}>{token}</code><br />⚠️ このトークンは30日間有効です。期限切れ後は再ログインして新しいトークンを取得し、設定を更新してください。</small></p>
+                    <p><small>{t('mcp.tokenLabel')}<br /><code style={{ wordBreak: 'break-all' }}>{token}</code><br />{t('mcp.tokenWarning')}</small></p>
                 )}
                 <p><strong>Claude Code</strong></p>
                 <pre>{token
-                    ? `claude mcp add --transport http --header "Authorization: Bearer ${token}" tatetodo https://todo.kaylee.jp/mcp`
+                    ? `claude mcp add --transport http tatetodo https://todo.kaylee.jp/mcp --header "Authorization: Bearer ${token}"`
                     : 'claude mcp add --transport http tatetodo https://todo.kaylee.jp/mcp'
                 }</pre>
-                <p><strong>Claude Desktop</strong>（<code>claude_desktop_config.json</code>に追加）</p>
-                <p><small>左下の名前をクリック → 設定 → 開発者 → 設定を編集、またはファイルを直接編集：<br />Mac: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code><br />Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></small></p>
-                <p><small>Claude DesktopはHTTPに直接対応していないため、<code>mcp-remote</code>プロキシ経由で接続します（Node.js必要）。</small></p>
+                <p><strong>{t('mcp.claudeDesktopHeading', { filename: 'claude_desktop_config.json' })}</strong></p>
+                <p><small>{t('mcp.claudeDesktopNote')}<br />Mac: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code><br />Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></small></p>
+                <p><small>{t('mcp.claudeDesktopProxy')}</small></p>
                 <pre>{token
                     ? `{
   "mcpServers": {
@@ -148,9 +151,11 @@ export function Home() {
                         const next = !v;
                         localStorage.setItem('writingModeHorizontal', String(next));
                         return next;
-                    })}>縦横表示切替</a>
+                    })}>{t('footer.toggleWritingMode')}</a>
                     {" · "}
-                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? '☀ ライトモード' : '🌙 ダークモード'}</a>
+                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? t('footer.lightMode') : t('footer.darkMode')}</a>
+                    {" · "}
+                    <LangSwitcher />
                 </p>
                 <FooterText />
             </footer>

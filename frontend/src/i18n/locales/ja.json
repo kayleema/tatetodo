@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "appName": "✔︎ やることリスト",
+    "hello": "こんにちは、{{username}}",
+    "logout": "ログアウト",
+    "login": "ログイン",
+    "register": "新規登録"
+  },
+  "home": {
+    "myBoards": "あなたのリスト",
+    "open": "開く",
+    "openOrCreate": "名前で開くもしくは作成：",
+    "listName": "リスト名",
+    "openList": "リストを開く",
+    "createRandom": "名前をランダムで作成する（UUID秘密）：",
+    "createList": "リストを作成"
+  },
+  "board": {
+    "back": "↩︎ ホームへ戻る",
+    "syncing": "同期中…",
+    "title": "やることリスト",
+    "boardId": "リスト識別子：",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "newTask": "新規タスク名を入力してください",
+    "add": "追加",
+    "owner": "オーナー",
+    "members": "メンバー",
+    "settings": "リストの設定",
+    "addMemberPlaceholder": "ユーザー名を追加",
+    "addMemberBtn": "追加",
+    "addMemberFailed": "追加に失敗しました",
+    "shareLink": "共有リンクを有効にする（URLを知っている人は誰でもアクセス可能）",
+    "shareUrl": "共有URL:",
+    "accessDenied": "アクセス拒否",
+    "accessDeniedMsg": "このリストを表示する権限がありません。",
+    "backToHome": "ホームへ戻る",
+    "motivational": "今日も一日お疲れ様でした！すべてのタスクが完了していなくても大丈夫。大切なのは、毎日少しずつ前進すること。明日も素敵な一日になりますように。"
+  },
+  "login": {
+    "title": "ログイン",
+    "usernamePlaceholder": "ユーザー名",
+    "passwordPlaceholder": "パスワード",
+    "submit": "ログイン",
+    "noAccount": "アカウントをお持ちでない方は",
+    "loginFailed": "ログインに失敗しました"
+  },
+  "register": {
+    "title": "新規登録",
+    "usernamePlaceholder": "ユーザー名",
+    "passwordPlaceholder": "パスワード（8文字以上）",
+    "submit": "登録",
+    "hasAccount": "すでにアカウントをお持ちの方は",
+    "registerFailed": "登録に失敗しました"
+  },
+  "footer": {
+    "toggleWritingMode": "縦横表示切替",
+    "lightMode": "☀ ライトモード",
+    "darkMode": "🌙 ダークモード",
+    "terms": "本アプリのご利用にあたっては、利用規約に同意したものとみなされます。お客様のプライバシーは非常に重要です。本アプリは現状有姿で提供され、いかなる保証も提供しません。"
+  },
+  "mcp": {
+    "title": "MCPサーバーの設定：",
+    "description": "AIエージェント（Claude等）からリストを読み書きできます。公開ボードは認証不要です。プライベートボードにアクセスするにはトークンが必要です。",
+    "tokenLabel": "ログイン中のトークン（コピーして下記コマンドに使用）：",
+    "tokenWarning": "⚠️ このトークンは30日間有効です。期限切れ後は再ログインして新しいトークンを取得し、設定を更新してください。",
+    "claudeDesktopHeading": "Claude Desktop（{{filename}}に追加）",
+    "claudeDesktopNote": "左下の名前をクリック → 設定 → 開発者 → 設定を編集、またはファイルを直接編集：",
+    "claudeDesktopProxy": "Claude DesktopはHTTPに直接対応していないため、mcp-remoteプロキシ経由で接続します（Node.js必要）。"
+  },
+  "lang": {
+    "ja": "日本語",
+    "en": "English",
+    "ko": "한국어"
+  }
+}

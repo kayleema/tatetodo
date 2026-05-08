@@ -5,6 +5,8 @@ import { FooterText } from "./FooterText.tsx";
 import { Link, useNavigate } from "react-router-dom";
 import { useColorScheme } from "./useColorScheme.ts";
 import { useAuth } from "./AuthContext.tsx";
+import { useTranslation } from 'react-i18next';
+import { LangSwitcher } from './LangSwitcher.tsx';
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -12,6 +14,7 @@ export function Board({ boardId }: { boardId: string }) {
     const { visibleListItems, update, insert, remove, unauthorized } = useTodoList(boardId)
     const { scheme, toggle: toggleColorScheme } = useColorScheme()
     const { token, username, logout } = useAuth()
+    const { t } = useTranslation()
     const navigate = useNavigate()
     const [editingId, setEditingId] = useState("")
     const [writingModeHorizontal, setWritingModeHorizontal] = useState(
@@ -43,7 +46,7 @@ export function Board({ boardId }: { boardId: string }) {
             body: JSON.stringify({ username: addMemberInput.trim() }),
         });
         const data = await res.json();
-        if (!res.ok) { setMemberError(data.error ?? '追加に失敗しました'); return; }
+        if (!res.ok) { setMemberError(data.error ?? t('board.addMemberFailed')); return; }
         setBoardMeta(m => m ? { ...m, memberUsernames: [...m.memberUsernames, addMemberInput.trim()] } : m);
         setAddMemberInput('');
     };
@@ -62,11 +65,11 @@ export function Board({ boardId }: { boardId: string }) {
     if (unauthorized) {
         return (
             <main style={{ writingMode: 'horizontal-tb' }}>
-                <nav><strong>✔︎ やることリスト</strong></nav>
+                <nav><strong>{t('nav.appName')}</strong></nav>
                 <article>
-                    <h3>アクセス拒否</h3>
-                    <p>このリストを表示する権限がありません。</p>
-                    <p><Link to="/">ホームへ戻る</Link></p>
+                    <h3>{t('board.accessDenied')}</h3>
+                    <p>{t('board.accessDeniedMsg')}</p>
+                    <p><Link to="/">{t('board.backToHome')}</Link></p>
                 </article>
             </main>
         );
@@ -75,20 +78,20 @@ export function Board({ boardId }: { boardId: string }) {
     return (
         <main style={{ writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl" }}>
             <nav>
-                <strong>✔︎ やることリスト</strong>
+                <strong>{t('nav.appName')}</strong>
                 {token
-                    ? <span>{username} · <a href="#" onClick={e => { e.preventDefault(); logout(); navigate('/'); }}>ログアウト</a></span>
-                    : <span><Link to="/login">ログイン</Link> · <Link to="/register">新規登録</Link></span>
+                    ? <span>{username} · <a href="#" onClick={e => { e.preventDefault(); logout(); navigate('/'); }}>{t('nav.logout')}</a></span>
+                    : <span><Link to="/login">{t('nav.login')}</Link> · <Link to="/register">{t('nav.register')}</Link></span>
                 }
             </nav>
             <div>
-                <Link to={'/'}>↩︎ ホームへ戻る</Link>
+                <Link to={'/'}>{t('board.back')}</Link>
                 <mark style={{ float: "right" }}>
-                    同期中…
+                    {t('board.syncing')}
                 </mark>
             </div>
-            <h2>やることリスト</h2>
-            <div>リスト識別子：<strong>{boardId}</strong></div>
+            <h2>{t('board.title')}</h2>
+            <div>{t('board.boardId')}<strong>{boardId}</strong></div>
             <ul style={{ minBlockSize: "200px" }}>
                 {visibleListItems.map((item) => (
                     getListItemUID(item) == editingId ? (
@@ -96,9 +99,9 @@ export function Board({ boardId }: { boardId: string }) {
                             <input type="checkbox" disabled checked={item.status} />
                             <fieldset>
                                 <input type="text" value={editingText} onChange={(e) => setEditingText(e.target.value)} />
-                                <button onClick={() => { update(getListItemUID(item), { text: editingText }); setEditingId(""); }}>保存</button>
-                                <button onClick={() => setEditingId("")}>キャンセル</button>
-                                <button onClick={() => remove(getListItemUID(item))} className="delete">削除</button>
+                                <button onClick={() => { update(getListItemUID(item), { text: editingText }); setEditingId(""); }}>{t('board.save')}</button>
+                                <button onClick={() => setEditingId("")}>{t('board.cancel')}</button>
+                                <button onClick={() => remove(getListItemUID(item))} className="delete">{t('board.delete')}</button>
                             </fieldset>
                         </li>
                     ) : (
@@ -116,7 +119,7 @@ export function Board({ boardId }: { boardId: string }) {
                                 onDragStart={(e) => e.dataTransfer.setData("text/plain", getListItemUID(item))}
                             >
                                 <input value={item.text} readOnly style={{ cursor: "move", flexGrow: 1 }} />
-                                <button className="secondary" onClick={() => { setEditingId(getListItemUID(item)); setEditingText(item.text); }}>編集</button>
+                                <button className="secondary" onClick={() => { setEditingId(getListItemUID(item)); setEditingText(item.text); }}>{t('board.edit')}</button>
                             </fieldset>
                         </li>
                     )
@@ -124,7 +127,7 @@ export function Board({ boardId }: { boardId: string }) {
                 <li>
                     <input type="checkbox" disabled />
                     <fieldset>
-                        <input type="text" value={newInputText} placeholder="新規タスク名を入力してください"
+                        <input type="text" value={newInputText} placeholder={t('board.newTask')}
                             onChange={(e) => setNewInputText(e.target.value)} />
                         <button onClick={() => {
                             insert({
@@ -135,38 +138,38 @@ export function Board({ boardId }: { boardId: string }) {
                                     : getListItemUID(visibleListItems[visibleListItems.length - 1]),
                             });
                             setNewInputText("");
-                        }} className="new">追加</button>
+                        }} className="new">{t('board.add')}</button>
                     </fieldset>
                 </li>
             </ul>
 
             {boardMeta && !isOwner && (
                 <article>
-                    <p><small><strong>オーナー:</strong> {boardMeta.ownerUsername}
-                    {boardMeta.memberUsernames.length > 0 && <> · <strong>メンバー:</strong> {boardMeta.memberUsernames.join(', ')}</>}
+                    <p><small><strong>{t('board.owner')}:</strong> {boardMeta.ownerUsername}
+                    {boardMeta.memberUsernames.length > 0 && <> · <strong>{t('board.members')}:</strong> {boardMeta.memberUsernames.join(', ')}</>}
                     </small></p>
                 </article>
             )}
 
             {isOwner && (
                 <article>
-                    <h3>リストの設定</h3>
-                    <p><strong>メンバー:</strong> {boardMeta!.ownerUsername}（オーナー）{boardMeta!.memberUsernames.map(m => `, ${m}`)}</p>
+                    <h3>{t('board.settings')}</h3>
+                    <p><strong>{t('board.members')}:</strong> {boardMeta!.ownerUsername}（{t('board.owner')}）{boardMeta!.memberUsernames.map(m => `, ${m}`)}</p>
                     <p>
                         <fieldset>
-                            <input placeholder="ユーザー名を追加" value={addMemberInput} onChange={e => setAddMemberInput(e.target.value)} />
-                            <button onClick={addMember}>追加</button>
+                            <input placeholder={t('board.addMemberPlaceholder')} value={addMemberInput} onChange={e => setAddMemberInput(e.target.value)} />
+                            <button onClick={addMember}>{t('board.addMemberBtn')}</button>
                         </fieldset>
                     </p>
                     {memberError && <p><mark>{memberError}</mark></p>}
                     <p>
                         <label>
                             <input type="checkbox" checked={boardMeta!.isPublic} onChange={toggleShareLink} style={{ width: 'auto', flexGrow: 0 }} />
-                            {" "}共有リンクを有効にする（URLを知っている人は誰でもアクセス可能）
+                            {" "}{t('board.shareLink')}
                         </label>
                     </p>
                     {boardMeta!.isPublic && (
-                        <p><small>共有URL: <code>{window.location.href}</code></small></p>
+                        <p><small>{t('board.shareUrl')} <code>{window.location.href}</code></small></p>
                     )}
                 </article>
             )}
@@ -177,14 +180,13 @@ export function Board({ boardId }: { boardId: string }) {
                         const next = !v;
                         localStorage.setItem('writingModeHorizontal', String(next));
                         return next;
-                    })}>縦横表示切替</a>
+                    })}>{t('footer.toggleWritingMode')}</a>
                     {" · "}
-                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? '☀ ライトモード' : '🌙 ダークモード'}</a>
+                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? t('footer.lightMode') : t('footer.darkMode')}</a>
+                    {" · "}
+                    <LangSwitcher />
                 </p>
-                <p>
-                    今日も一日お疲れ様でした！すべてのタスクが完了していなくても大丈夫。
-                    大切なのは、毎日少しずつ前進すること。明日も素敵な一日になりますように。
-                </p>
+                <p>{t('board.motivational')}</p>
                 <hr />
                 <FooterText />
             </footer>

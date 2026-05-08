@@ -65,6 +65,7 @@
 
 body {
     background: var(--bg-primary);
+    overflow: auto;
 }
 
 body, input, button {
@@ -85,6 +86,7 @@ main {
     box-sizing: border-box;
     gap: 20px;
     max-inline-size: 900px;
+    overflow-x: auto;
 }
 
 nav {
@@ -280,17 +282,19 @@ h1, h2, h3 {
 a {
     color: var(--primary);
     text-decoration: none;
+    margin-inline: 2px;
+    padding-inline: 2px;
 
     &:hover, &:focus-visible {
         color: var(--primary-light);
-        text-underline-offset: 3px;
-        text-underline-position: right;
         background: var(--color-shadow-inset);
-        border-inline: 5px solid transparent;
-        margin-inline: -5px;
-        outline: 8px solid var(--color-shadow-inset);
+        outline: 5px solid var(--color-shadow-inset);
         border-radius: 3px;
     }
+}
+.linkSpacing {
+    margin-inline: 2px;
+    padding-inline: 2px;
 }
 
 code {

@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "appName": "✔︎ To-Do List",
+    "hello": "Hello, {{username}}",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "myBoards": "Your Lists",
+    "open": "Open",
+    "openOrCreate": "Open or create by name:",
+    "listName": "List name",
+    "openList": "Open List",
+    "createRandom": "Create with random name (secret UUID):",
+    "createList": "Create List"
+  },
+  "board": {
+    "back": "↩︎ Back to Home",
+    "syncing": "Syncing…",
+    "title": "To-Do List",
+    "boardId": "List ID:",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "newTask": "Enter new task name",
+    "add": "Add",
+    "owner": "Owner",
+    "members": "Members",
+    "settings": "List Settings",
+    "addMemberPlaceholder": "Add username",
+    "addMemberBtn": "Add",
+    "addMemberFailed": "Failed to add member",
+    "shareLink": "Enable share link (anyone with the URL can access)",
+    "shareUrl": "Share URL:",
+    "accessDenied": "Access Denied",
+    "accessDeniedMsg": "You don't have permission to view this list.",
+    "backToHome": "Back to Home",
+    "motivational": "Great work today! It's okay if not every task is done. What matters is making a little progress every day. Wishing you a wonderful tomorrow."
+  },
+  "login": {
+    "title": "Login",
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Password",
+    "submit": "Login",
+    "noAccount": "Don't have an account?",
+    "loginFailed": "Login failed"
+  },
+  "register": {
+    "title": "Register",
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Password (8+ characters)",
+    "submit": "Register",
+    "hasAccount": "Already have an account?",
+    "registerFailed": "Registration failed"
+  },
+  "footer": {
+    "toggleWritingMode": "Toggle writing direction",
+    "lightMode": "☀ Light mode",
+    "darkMode": "🌙 Dark mode",
+    "terms": "By using this app, you agree to the terms of service. Your privacy is important to us. This app is provided as-is without any warranty, express or implied."
+  },
+  "mcp": {
+    "title": "MCP Server Setup:",
+    "description": "Read and write your lists from AI agents (Claude, etc.). Public boards don't require authentication. Private boards require a token.",
+    "tokenLabel": "Your current token (copy and use in the commands below):",
+    "tokenWarning": "⚠️ This token is valid for 30 days. After it expires, log in again to get a new token and update your config.",
+    "claudeDesktopHeading": "Claude Desktop (add to {{filename}})",
+    "claudeDesktopNote": "Click your name in the lower left → Settings → Developer → Edit Config, or edit the file directly:",
+    "claudeDesktopProxy": "Claude Desktop doesn't support HTTP directly, so connect via the mcp-remote proxy (Node.js required)."
+  },
+  "lang": {
+    "ja": "日本語",
+    "en": "English",
+    "ko": "한국어"
+  }
+}

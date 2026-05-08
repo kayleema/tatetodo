@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "appName": "✔︎ 할 일 목록",
+    "hello": "안녕하세요, {{username}}",
+    "logout": "로그아웃",
+    "login": "로그인",
+    "register": "회원가입"
+  },
+  "home": {
+    "myBoards": "내 목록",
+    "open": "열기",
+    "openOrCreate": "이름으로 열기 또는 만들기:",
+    "listName": "목록 이름",
+    "openList": "목록 열기",
+    "createRandom": "랜덤 이름으로 만들기 (비밀 UUID):",
+    "createList": "목록 만들기"
+  },
+  "board": {
+    "back": "↩︎ 홈으로 돌아가기",
+    "syncing": "동기화 중…",
+    "title": "할 일 목록",
+    "boardId": "목록 ID:",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "newTask": "새 할 일 이름 입력",
+    "add": "추가",
+    "owner": "소유자",
+    "members": "멤버",
+    "settings": "목록 설정",
+    "addMemberPlaceholder": "사용자 이름 추가",
+    "addMemberBtn": "추가",
+    "addMemberFailed": "추가에 실패했습니다",
+    "shareLink": "공유 링크 활성화 (URL을 아는 누구나 접근 가능)",
+    "shareUrl": "공유 URL:",
+    "accessDenied": "접근 거부",
+    "accessDeniedMsg": "이 목록을 볼 권한이 없습니다.",
+    "backToHome": "홈으로 돌아가기",
+    "motivational": "오늘도 수고하셨습니다! 모든 할 일을 다 끝내지 못해도 괜찮아요. 중요한 것은 매일 조금씩 나아가는 것입니다. 내일도 좋은 하루 되세요."
+  },
+  "login": {
+    "title": "로그인",
+    "usernamePlaceholder": "사용자 이름",
+    "passwordPlaceholder": "비밀번호",
+    "submit": "로그인",
+    "noAccount": "계정이 없으신가요?",
+    "loginFailed": "로그인에 실패했습니다"
+  },
+  "register": {
+    "title": "회원가입",
+    "usernamePlaceholder": "사용자 이름",
+    "passwordPlaceholder": "비밀번호 (8자 이상)",
+    "submit": "가입하기",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "registerFailed": "가입에 실패했습니다"
+  },
+  "footer": {
+    "toggleWritingMode": "세로/가로 표시 전환",
+    "lightMode": "☀ 라이트 모드",
+    "darkMode": "🌙 다크 모드",
+    "terms": "본 앱을 이용함으로써 이용약관에 동의한 것으로 간주됩니다. 귀하의 개인정보는 매우 중요합니다. 본 앱은 어떠한 보증도 없이 현재 상태로 제공됩니다."
+  },
+  "mcp": {
+    "title": "MCP 서버 설정:",
+    "description": "AI 에이전트(Claude 등)에서 목록을 읽고 쓸 수 있습니다. 공개 보드는 인증이 필요 없습니다. 비공개 보드는 토큰이 필요합니다.",
+    "tokenLabel": "현재 토큰 (아래 명령어에 복사하여 사용):",
+    "tokenWarning": "⚠️ 이 토큰은 30일간 유효합니다. 만료 후에는 다시 로그인하여 새 토큰을 받아 설정을 업데이트하세요.",
+    "claudeDesktopHeading": "Claude Desktop ({{filename}}에 추가)",
+    "claudeDesktopNote": "왼쪽 하단의 이름 클릭 → 설정 → 개발자 → 설정 편집, 또는 파일 직접 편집:",
+    "claudeDesktopProxy": "Claude Desktop은 HTTP를 직접 지원하지 않으므로 mcp-remote 프록시를 통해 연결합니다 (Node.js 필요)."
+  },
+  "lang": {
+    "ja": "日本語",
+    "en": "English",
+    "ko": "한국어"
+  }
+}
