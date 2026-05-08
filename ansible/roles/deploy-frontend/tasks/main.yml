@@ -1,0 +1,11 @@
+- name: build frontend locally
+  local_action: command npm run build chdir=../frontend
+  become: no
+
+- name: sync build to server
+  synchronize:
+    src: ../frontend/dist/
+    dest: /var/www/tatetodo/
+    delete: yes
+    recursive: yes
+    use_ssh_args: true

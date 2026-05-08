@@ -1,0 +1,79 @@
+- name: create tatetodo user
+  user:
+    name: tatetodo
+    system: yes
+    shell: /bin/bash
+    create_home: yes
+
+
+- name: create app directory
+  file:
+    path: /opt/tatetodo/
+    state: directory
+    owner: tatetodo
+    group: tatetodo
+    mode: '0755'
+
+- name: create react app directory
+  file:
+    path: /var/www/tatetodo/
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: configure nginx site
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/todo.kaylee.jp
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: enable nginx site
+  file:
+    src: /etc/nginx/sites-available/todo.kaylee.jp
+    dest: /etc/nginx/sites-enabled/todo.kaylee.jp
+    state: link
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
+- name: install tatetodo service
+  template:
+    src: tatetodo.service.j2
+    dest: /etc/systemd/system/tatetodo.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: enable tatetodo service
+  systemd:
+    name: tatetodo
+    enabled: yes
+    daemon_reload: yes
+
+- name: Install nvm
+  shell: |
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
+  args:
+    creates: /home/tatetodo/.nvm/nvm.sh
+  become: true
+  become_user: tatetodo
+- name: Install Node 22 via nvm
+  shell: |
+    source ~/.nvm/nvm.sh && nvm install 22.20.0
+  args:
+    executable: /bin/bash
+    creates: ~/.nvm/versions/node/v22.20.0/bin/node
+  become: true
+  become_user: tatetodo
+- name: Set Node 22 as default
+  shell: |
+    source ~/.nvm/nvm.sh && nvm alias default 22.20.0
+  args:
+    executable: /bin/bash
+  become: true
+  become_user: tatetodo

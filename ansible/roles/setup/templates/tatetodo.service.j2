@@ -1,0 +1,14 @@
+[Unit]
+Description=Tatetodo Backend
+After=network.target couchdb.service
+
+[Service]
+Type=simple
+User=tatetodo
+WorkingDirectory=/opt/tatetodo/
+ExecStart=/home/tatetodo/.nvm/versions/node/v22.20.0/bin/node dist/index.js
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

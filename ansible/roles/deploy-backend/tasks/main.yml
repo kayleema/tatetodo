@@ -1,0 +1,38 @@
+- name: build backend locally
+  local_action: command npm run build
+  args:
+    chdir: ../backend
+  become: no
+
+- name: sync backend to server
+  synchronize:
+    src: ../backend/
+    dest: /opt/tatetodo/
+    delete: yes
+    recursive: yes
+    rsync_opts:
+      - "--exclude=node_modules"
+      - "--exclude=.env"
+    use_ssh_args: true
+- name: fix backend ownership
+  file:
+    path: /opt/tatetodo/
+    owner: tatetodo
+    group: tatetodo
+    recurse: yes
+
+- name: install dependencies
+  command:
+    argv:
+      - /home/tatetodo/.nvm/versions/node/v22.20.0/bin/npm
+      - install
+      - --production
+    chdir: /opt/tatetodo/
+  become_user: tatetodo
+  environment:
+    PATH: /home/tatetodo/.nvm/versions/node/v22.20.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+- name: restart backend service
+  service:
+    name: tatetodo
+    state: restarted
