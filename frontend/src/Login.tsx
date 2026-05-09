@@ -4,11 +4,12 @@ import { useAuth } from './AuthContext.tsx';
 import { useColorScheme } from './useColorScheme.ts';
 import { useTranslation } from 'react-i18next';
 import { LangSwitcher } from './LangSwitcher.tsx';
+import { ThemeSwitcher } from './ThemeSwitcher.tsx';
 
 export function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const { scheme, toggle: toggleColorScheme } = useColorScheme();
+    useColorScheme(); // keeps theme applied on this page
     const { t } = useTranslation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -47,7 +48,7 @@ export function Login() {
             </article>
             <footer>
                 <p>
-                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? t('footer.lightMode') : t('footer.darkMode')}</a>
+                    <ThemeSwitcher />
                     {" · "}
                     <LangSwitcher />
                 </p>

@@ -168,11 +168,11 @@ export function Home() {
 
             <footer>
                 <p>
-                    <a href="#" onClick={() => setWritingModeHorizontal(v => {
+                    <button className="secondary" onClick={() => setWritingModeHorizontal(v => {
                         const next = !v;
                         localStorage.setItem('writingModeHorizontal', String(next));
                         return next;
-                    })}>{t('footer.toggleWritingMode')}</a>
+                    })}>{t('footer.toggleWritingMode')}</button>
                     {" · "}
                     <ThemeSwitcher />
                     {" · "}

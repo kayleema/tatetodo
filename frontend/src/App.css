@@ -73,20 +73,20 @@
     --color-text-button: #4a3628;
     --primary-bg: #e8d8b0;
     --primary-bg-active: #d8c898;
-    --primary-border: #9a7840;
-    --primary: #7a4a1e;
-    --primary-light: #5a3010;
+    --primary-border: #911616;
+    --primary: #7a1e1e;
+    --primary-light: #5a1010;
     --error-bg-active: #f5d0c0;
     --error-bg: #fae4d8;
     --error-border: #c05020;
     --error-text: #a03010;
     --success-bg-active: #d0e8c0;
-    --success-bg: #e4f0d8;
-    --success-border: #608040;
-    --success-text: #406020;
+    --success-bg: #0a04;
+    --success-border: #0a0;
+    --success-text: #080;
     --color-shadow-inset: #0001;
-    --bevel-light: #fff6;
-    --bevel-dark: #0002;
+    --bevel-light: #fff0;
+    --bevel-dark: #0000;
     --font-theme: "BIZ UDPMincho", serif;
 }
 
@@ -117,9 +117,10 @@
 body {
     background: var(--bg-primary);
     overflow: auto;
+    accent-color: var(--primary);
 }
 
-body, input, textarea, button {
+body, input, textarea, button, select {
     font-family: var(--font-theme);
     line-height: 1.5;
     color: var(--color-text);
@@ -184,17 +185,51 @@ ul {
 }
 
 input[type=checkbox] {
+    appearance: none;
+    -webkit-appearance: none;
     flex-grow: 0;
     flex-shrink: 0;
-    inline-size: 1.2rem;
-    block-size: 1.2rem;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    padding: 4px;
     margin-inline-end: 10px;
+    cursor: pointer;
+    border: 1px solid var(--border-primary);
+    border-radius: 10px;
+    background: var(--primary-bg);
+    transition: background 0.15s;
+    position: relative;
+
+    &:hover:not(:disabled) {
+        border-color: var(--primary-border);
+    }
+
+    &:checked {
+        background: var(--primary-bg);
+        border-color: var(--border-primary);
+
+        &::after {
+            content: '';
+            display: block;
+            inline-size: 100%;
+            block-size: 100%;
+            background-color: var(--color-text-button);
+            mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='1.5,5.5 4.5,8.5 10.5,1.5' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='1.5,5.5 4.5,8.5 10.5,1.5' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+            mask-repeat: no-repeat;
+            mask-position: center;
+            mask-size: 85%;
+        }
+    }
 
     &:disabled {
-        opacity: 0.5;
+        opacity: 0.45;
+        cursor: default;
     }
+
     &:focus-visible {
-        outline: 1px solid var(--primary-border);
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
     }
 }
 
@@ -230,16 +265,16 @@ input, textarea {
         color: var(--border-primary);
     }
 
-    &:focus-visible {
-        border-color: var(--primary-border);
-        outline: none;
-    }
-
     &:hover {
         border-color: var(--primary-border);
         &::placeholder {
             color: var(--border-secondary);
         }
+    }
+
+    &:focus-visible {
+        border-color: var(--primary-border);
+        outline: none;
     }
 }
 
@@ -258,7 +293,7 @@ textarea {
     }
 }
 
-button, .buttonLink {
+button, .buttonLink, select {
     color: var(--color-text-button);
     font-size: 1rem;
     padding: 4px;
@@ -324,6 +359,10 @@ button, .buttonLink {
         border-color: var(--border-primary);
         cursor: default;
     }
+}
+
+select {
+    padding-block: 6px;
 }
 
 fieldset {

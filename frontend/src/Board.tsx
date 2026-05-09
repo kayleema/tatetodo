@@ -15,7 +15,7 @@ const isHeading = (text: string) => text.startsWith('#') || text.startsWith('＃
 
 export function Board({boardId}: { boardId: string }) {
     const {visibleListItems, update, insert, remove, unauthorized, status, pendingCount} = useTodoList(boardId)
-    const {scheme} = useColorScheme()
+    useColorScheme()
     const {token, username, logout} = useAuth()
     const {t} = useTranslation()
     const navigate = useNavigate()
@@ -281,11 +281,11 @@ export function Board({boardId}: { boardId: string }) {
 
             <footer>
                 <p>
-                    <a href="#" onClick={() => setWritingModeHorizontal(v => {
+                    <button className="secondary" onClick={() => setWritingModeHorizontal(v => {
                         const next = !v;
                         localStorage.setItem('writingModeHorizontal', String(next));
                         return next;
-                    })}>{t('footer.toggleWritingMode')}</a>
+                    })}>{t('footer.toggleWritingMode')}</button>
                     {" · "}
                     <ThemeSwitcher />
                     {" · "}
