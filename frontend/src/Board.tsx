@@ -7,6 +7,7 @@ import {useColorScheme} from "./useColorScheme.ts";
 import {useAuth} from "./AuthContext.tsx";
 import {useTranslation} from 'react-i18next';
 import {LangSwitcher} from './LangSwitcher.tsx';
+import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -14,7 +15,7 @@ const isHeading = (text: string) => text.startsWith('#') || text.startsWith('＃
 
 export function Board({boardId}: { boardId: string }) {
     const {visibleListItems, update, insert, remove, unauthorized, status, pendingCount} = useTodoList(boardId)
-    const {scheme, toggle: toggleColorScheme} = useColorScheme()
+    const {scheme} = useColorScheme()
     const {token, username, logout} = useAuth()
     const {t} = useTranslation()
     const navigate = useNavigate()
@@ -286,8 +287,7 @@ export function Board({boardId}: { boardId: string }) {
                         return next;
                     })}>{t('footer.toggleWritingMode')}</a>
                     {" · "}
-                    <a href="#"
-                       onClick={toggleColorScheme}>{scheme === 'dark' ? t('footer.lightMode') : t('footer.darkMode')}</a>
+                    <ThemeSwitcher />
                     {" · "}
                     <LangSwitcher/>
                 </p>

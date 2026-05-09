@@ -70,8 +70,9 @@
   },
   "footer": {
     "toggleWritingMode": "縦横表示切替",
-    "lightMode": "☀ ライトモード",
-    "darkMode": "🌙 ダークモード",
+    "lightMode": "☀️ ライト",
+    "darkMode": "🌙 ダーク",
+    "parchmentMode": "📜 パーチメント",
     "terms": "本アプリをご利用いただくことで、以下に同意したものとみなされます：",
     "termsLink": "利用規約",
     "reportAbuse": "違反を報告"

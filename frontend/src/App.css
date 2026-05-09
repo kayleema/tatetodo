@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho:wght@400;700&display=swap');
 
 :root {
     color-scheme: light;
@@ -26,6 +27,7 @@
     --color-shadow-inset: #0002;
     --bevel-light: #fffa;
     --bevel-dark: #0002;
+    --font-theme: "BIZ UDPGothic", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -59,6 +61,35 @@
     }
 }
 
+:root[data-theme="parchment"] {
+    color-scheme: light;
+    --bg-surface: #fdf6e3;
+    --bg-primary: #f5ede0;
+    --bg-secondary: #ede3cf;
+    --border-secondary: #d4c4a0;
+    --border-primary: #b8a070;
+    --medium-gray: #7a6050;
+    --color-text: #3d2b1f;
+    --color-text-button: #4a3628;
+    --primary-bg: #e8d8b0;
+    --primary-bg-active: #d8c898;
+    --primary-border: #9a7840;
+    --primary: #7a4a1e;
+    --primary-light: #5a3010;
+    --error-bg-active: #f5d0c0;
+    --error-bg: #fae4d8;
+    --error-border: #c05020;
+    --error-text: #a03010;
+    --success-bg-active: #d0e8c0;
+    --success-bg: #e4f0d8;
+    --success-border: #608040;
+    --success-text: #406020;
+    --color-shadow-inset: #0001;
+    --bevel-light: #fff6;
+    --bevel-dark: #0002;
+    --font-theme: "BIZ UDPMincho", serif;
+}
+
 :root[data-theme="dark"] {
     color-scheme: dark;
     --bg-surface: #111;
@@ -89,7 +120,7 @@ body {
 }
 
 body, input, textarea, button {
-    font-family: "BIZ UDPGothic", sans-serif;
+    font-family: var(--font-theme);
     line-height: 1.5;
     color: var(--color-text);
 }

@@ -7,21 +7,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2255cc" />
     <title>TateTodo</title>
-    <meta name="description" content="みんなで使えるリアルタイムやることリスト。リストを作って友達やチームと共有しよう。" />
-    <!-- Open Graph -->
+    <!-- Open Graph (defaults; patched by inline script below based on stored language) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TateTodo" />
-    <meta property="og:title" content="✅ TATETODO — リアルタイム共有やることリスト" />
-    <meta property="og:description" content="みんなで使えるリアルタイムやることリスト。リストを作って友達やチームと共有しよう。" />
+    <meta property="og:title" content="✅ TATETODO — Real-time Collaborative Todo List" />
+    <meta property="og:description" content="Create a list, share it with friends or teammates, and see changes appear instantly." />
+    <meta name="description"         content="Create a list, share it with friends or teammates, and see changes appear instantly." />
     <meta property="og:url" content="https://todo.kaylee.jp/" />
-    <meta property="og:image" content="https://todo.kaylee.jp/og-image.png" />
+    <meta property="og:image" content="https://todo.kaylee.jp/og-image-en.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:locale:alternate" content="ja" />
+    <meta property="og:locale:alternate" content="ko" />
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="✅ TATETODO — リアルタイム共有やることリスト" />
-    <meta name="twitter:description" content="みんなで使えるリアルタイムやることリスト。リストを作って友達やチームと共有しよう。" />
-    <meta name="twitter:image" content="https://todo.kaylee.jp/og-image.png" />
+    <meta name="twitter:title" content="✅ TATETODO — Real-time Collaborative Todo List" />
+    <meta name="twitter:description" content="Create a list, share it with friends or teammates, and see changes appear instantly." />
+    <meta name="twitter:image" content="https://todo.kaylee.jp/og-image-en.png" />
+    <script>
+      (function () {
+        var base = 'https://todo.kaylee.jp/';
+        var strings = {
+          ja: {
+            title:  "✅ タテトド — リアルタイム共有やることリスト",
+            desc:   "みんなで使えるリアルタイムやることリスト。リストを作って友達やチームと共有しよう。",
+            locale: "ja_JP",
+            image:  base + "og-image-ja.png"
+          },
+          ko: {
+            title:  "✅ TATETODO — 실시간 공유 할 일 목록",
+            desc:   "리스트를 만들고 친구나 팀원과 공유하면 변경사항이 모든 기기에 즉시 반영됩니다.",
+            locale: "ko_KR",
+            image:  base + "og-image-ko.png"
+          }
+        };
+        var lang = (localStorage.getItem('lang') || navigator.language || '').slice(0, 2);
+        var s = strings[lang];
+        if (!s) return;
+        document.querySelector('meta[property="og:title"]').setAttribute('content', s.title);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', s.desc);
+        document.querySelector('meta[property="og:locale"]').setAttribute('content', s.locale);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', s.image);
+        document.querySelector('meta[name="description"]').setAttribute('content', s.desc);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', s.title);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', s.desc);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', s.image);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

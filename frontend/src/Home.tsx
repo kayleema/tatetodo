@@ -5,6 +5,7 @@ import {useColorScheme} from "./useColorScheme.ts";
 import {useAuth} from "./AuthContext.tsx";
 import {useTranslation} from 'react-i18next';
 import {LangSwitcher} from './LangSwitcher.tsx';
+import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 import {HeroCard} from './HeroCard.tsx';
 import {MCPCard} from "./MCPCard.tsx";
 
@@ -31,7 +32,7 @@ export function Home() {
         () => localStorage.getItem('writingModeHorizontal') !== 'false'
     );
     const navigate = useNavigate();
-    const { scheme, toggle: toggleColorScheme } = useColorScheme();
+    const { scheme } = useColorScheme();
     const { token, username, logout } = useAuth();
     const { t } = useTranslation();
     const [boards, setBoards] = useState<BoardMeta[]>([]);
@@ -173,7 +174,7 @@ export function Home() {
                         return next;
                     })}>{t('footer.toggleWritingMode')}</a>
                     {" · "}
-                    <a href="#" onClick={toggleColorScheme}>{scheme === 'dark' ? t('footer.lightMode') : t('footer.darkMode')}</a>
+                    <ThemeSwitcher />
                     {" · "}
                     <LangSwitcher />
                 </p>

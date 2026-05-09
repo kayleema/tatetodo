@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-export function HeroCard({ scheme }: { scheme: 'light' | 'dark' }) {
+export function HeroCard({ scheme }: { scheme: 'light' | 'dark' | 'parchment' }) {
     const { t } = useTranslation();
 
     return (
