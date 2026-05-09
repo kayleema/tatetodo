@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
+  <!-- Shadow -->
+  <ellipse cx="100" cy="250" rx="52" ry="9" fill="#00000050"/>
+
+  <!-- Feet -->
+  <ellipse cx="79"  cy="224" rx="22" ry="14" fill="#112255" stroke="#5566bb" stroke-width="2.5"/>
+  <ellipse cx="123" cy="224" rx="22" ry="14" fill="#112255" stroke="#5566bb" stroke-width="2.5"/>
+
+  <!-- Arms -->
+  <rect x="12"  y="133" width="40" height="18" rx="9" fill="#112255" stroke="#5566bb" stroke-width="2.5" transform="rotate(28 32 142)"/>
+  <rect x="148" y="133" width="40" height="18" rx="9" fill="#112255" stroke="#5566bb" stroke-width="2.5" transform="rotate(-28 168 142)"/>
+
+  <!-- Body -->
+  <circle cx="100" cy="145" r="75" fill="#223366" stroke="#5566bb" stroke-width="3"/>
+
+  <!-- Belly checklist panel -->
+  <rect x="69" y="151" width="62" height="57" rx="8" fill="#111" stroke="#333" stroke-width="2"/>
+
+  <!-- Row 1: checked -->
+  <rect x="77" y="160" width="9" height="9" rx="2" fill="#223366" stroke="#5588ff" stroke-width="1.5"/>
+  <polyline points="78.5,164.5 81,168 86.5,162" stroke="#5588ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="91" y1="164.5" x2="124" y2="164.5" stroke="#5566bb" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Row 2: checked -->
+  <rect x="77" y="174" width="9" height="9" rx="2" fill="#223366" stroke="#5588ff" stroke-width="1.5"/>
+  <polyline points="78.5,178.5 81,182 86.5,176" stroke="#5588ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="91" y1="178.5" x2="118" y2="178.5" stroke="#5566bb" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Row 3: unchecked -->
+  <rect x="77" y="188" width="9" height="9" rx="2" fill="none" stroke="#555" stroke-width="1.5"/>
+  <line x1="91" y1="192.5" x2="120" y2="192.5" stroke="#555" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Pencil hat (tip up, eraser near head, tilted left) -->
+  <g transform="rotate(-10, 108, 70)">
+    <!-- Eraser -->
+    <rect x="101" y="60" width="14" height="11" rx="4" fill="#cc6677" stroke="#aa4455" stroke-width="1.5"/>
+    <!-- Metal ferrule -->
+    <rect x="100" y="52" width="16" height="9" rx="1" fill="#777788" stroke="#555566" stroke-width="1.2"/>
+    <!-- Pencil body -->
+    <rect x="101" y="16" width="14" height="37" fill="#c8a830" stroke="#907218" stroke-width="2"/>
+    <!-- Wood cone -->
+    <polygon points="101,16 115,16 108,4" fill="#a06840" stroke="#907218" stroke-width="1.8"/>
+    <!-- Graphite tip (light, visible on dark bg) -->
+    <polygon points="104.5,8 111.5,8 108,4" fill="#cccccc" stroke="#aaaaaa" stroke-width="0.8"/>
+  </g>
+
+  <!-- Eyes: light sclera so they read on the dark body -->
+  <!-- Left eye -->
+  <ellipse cx="82"  cy="113" rx="11.5" ry="13.5" fill="#dde8ff"/>
+  <ellipse cx="82"  cy="113" rx="9"    ry="11"   fill="#1a1a2e"/>
+  <circle  cx="86"  cy="108" r="4"     fill="white"/>
+  <circle  cx="80"  cy="119" r="1.5"   fill="white" opacity="0.5"/>
+  <!-- Right eye -->
+  <ellipse cx="118" cy="113" rx="11.5" ry="13.5" fill="#dde8ff"/>
+  <ellipse cx="118" cy="113" rx="9"    ry="11"   fill="#1a1a2e"/>
+  <circle  cx="122" cy="108" r="4"     fill="white"/>
+  <circle  cx="116" cy="119" r="1.5"   fill="white" opacity="0.5"/>
+
+  <!-- Blush (slightly brighter to punch through the dark bg) -->
+  <ellipse cx="65"  cy="127" rx="11" ry="6" fill="#ff5577" opacity="0.45"/>
+  <ellipse cx="135" cy="127" rx="11" ry="6" fill="#ff5577" opacity="0.45"/>
+
+  <!-- Smile (light blue to show on dark body) -->
+  <path d="M 87 134 Q 100 148 113 134" stroke="#a6bfff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>

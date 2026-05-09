@@ -11,7 +11,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function decodeUsername(token: string): string | null {
     try {
-        return JSON.parse(atob(token.split('.')[1])).username ?? null;
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes)).username ?? null;
     } catch {
         return null;
     }

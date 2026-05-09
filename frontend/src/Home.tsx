@@ -1,12 +1,18 @@
-import { useRef, useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { FooterText } from "./FooterText.tsx";
-import { useColorScheme } from "./useColorScheme.ts";
-import { useAuth } from "./AuthContext.tsx";
-import { useTranslation } from 'react-i18next';
-import { LangSwitcher } from './LangSwitcher.tsx';
+import {useEffect, useRef, useState} from "react";
+import {Link, useNavigate} from "react-router-dom";
+import {FooterText} from "./FooterText.tsx";
+import {useColorScheme} from "./useColorScheme.ts";
+import {useAuth} from "./AuthContext.tsx";
+import {useTranslation} from 'react-i18next';
+import {LangSwitcher} from './LangSwitcher.tsx';
+import {HeroCard} from './HeroCard.tsx';
+import {MCPCard} from "./MCPCard.tsx";
 
 type BoardMeta = { boardId: string; ownerUsername: string; isPublic: boolean; createdAt: string };
+
+interface BeforeInstallPromptEvent extends Event {
+    prompt(): Promise<void>;
+}
 
 async function apiCreateBoard(boardId: string | undefined, token: string): Promise<string> {
     const res = await fetch('/api/boards', {
@@ -29,15 +35,28 @@ export function Home() {
     const { token, username, logout } = useAuth();
     const { t } = useTranslation();
     const [boards, setBoards] = useState<BoardMeta[]>([]);
+    const [loadingBoards, setLoadingBoards] = useState(false);
     const [boardError, setBoardError] = useState('');
+    const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
     useEffect(() => {
-        if (!token) return;
+        const handler = (e: Event) => { e.preventDefault(); setInstallPrompt(e as BeforeInstallPromptEvent); };
+        window.addEventListener('beforeinstallprompt', handler);
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const fetchBoards = () => {
+        if (!token) { setBoards([]); return; }
+        setLoadingBoards(true);
         fetch('/api/boards', { headers: { 'Authorization': `Bearer ${token}` } })
             .then(r => r.json())
             .then(setBoards)
-            .catch(() => {});
-    }, [token]);
+            .catch(() => {})
+            .finally(() => setLoadingBoards(false));
+    };
+
+    useEffect(fetchBoards, [token]);
 
     const openOrCreate = async () => {
         const name = nameInputRef.current?.value.trim();
@@ -54,6 +73,12 @@ export function Home() {
                 setBoardError(e.message);
             }
         }
+    };
+
+    const install = async () => {
+        if (!installPrompt) return;
+        await installPrompt.prompt();
+        setInstallPrompt(null);
     };
 
     const createRandom = async () => {
@@ -77,16 +102,32 @@ export function Home() {
                 }
             </nav>
 
-            {boards.length > 0 && (
+            <HeroCard scheme={scheme} />
+
+            {token && (
                 <article>
-                    <h3>{t('home.myBoards')}</h3>
+                    <h3 style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        {t('home.myBoards')}
+                        <button className="secondary" onClick={fetchBoards} style={{fontSize: '0.8rem'}} disabled={loadingBoards}>{t('home.refresh')}</button>
+                    </h3>
+                    {loadingBoards
+                        ? <p><small>{t('home.loading')}</small></p>
+                        : boards.length === 0 && <p><small>{t('home.noBoards')}</small></p>
+                    }
                     <ul>
                         {boards.map(b => (
-                            <li key={b.boardId} style={{ cursor: 'pointer' }} onClick={() => navigate(`/board/${b.boardId}`)}>
+                            <li key={b.boardId} style={{cursor: 'pointer', flexDirection: 'column', alignItems: 'stretch', gap: '2px'}}
+                                onClick={() => navigate(`/board/${b.boardId}`)}>
                                 <fieldset>
-                                    <input value={b.boardId} readOnly style={{ cursor: 'pointer', flexGrow: 1 }} />
-                                    <button className="secondary" onClick={e => { e.stopPropagation(); navigate(`/board/${b.boardId}`); }}>{t('home.open')}</button>
+                                    <input value={b.boardId} readOnly style={{cursor: 'pointer', flexGrow: 1}}/>
+                                    <button className="secondary" onClick={e => {
+                                        e.stopPropagation();
+                                        navigate(`/board/${b.boardId}`);
+                                    }}>{t('home.open')}</button>
                                 </fieldset>
+                                {b.ownerUsername !== username && (
+                                    <small style={{paddingInline: '10px'}}>（{t('home.sharedBy', { owner: b.ownerUsername })}）</small>
+                                )}
                             </li>
                         ))}
                     </ul>
@@ -111,39 +152,18 @@ export function Home() {
                 <p><button onClick={createRandom}>{t('home.createList')}</button></p>
             </article>
 
-            <article style={{ writingMode: "horizontal-tb", overflowY: "auto", flexShrink: 0, width: writingModeHorizontal ? "auto" : "400px" }}>
-                <h3>{t('mcp.title')}</h3>
-                <p>{t('mcp.description')}</p>
-                {token && (
-                    <p><small>{t('mcp.tokenLabel')}<br /><code style={{ wordBreak: 'break-all' }}>{token}</code><br />{t('mcp.tokenWarning')}</small></p>
-                )}
-                <p><strong>Claude Code</strong></p>
-                <pre>{token
-                    ? `claude mcp add --transport http tatetodo https://todo.kaylee.jp/mcp --header "Authorization: Bearer ${token}"`
-                    : 'claude mcp add --transport http tatetodo https://todo.kaylee.jp/mcp'
-                }</pre>
-                <p><strong>{t('mcp.claudeDesktopHeading', { filename: 'claude_desktop_config.json' })}</strong></p>
-                <p><small>{t('mcp.claudeDesktopNote')}<br />Mac: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code><br />Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></small></p>
-                <p><small>{t('mcp.claudeDesktopProxy')}</small></p>
-                <pre>{token
-                    ? `{
-  "mcpServers": {
-    "tatetodo": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "--header", "Authorization: Bearer ${token}", "https://todo.kaylee.jp/mcp"]
-    }
-  }
-}`
-                    : `{
-  "mcpServers": {
-    "tatetodo": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://todo.kaylee.jp/mcp"]
-    }
-  }
-}`
-                }</pre>
-            </article>
+            {!isStandalone && (
+                <article>
+                    <h3>{t('home.pwaTitle')}</h3>
+                    <p>{t('home.pwaDesc')}</p>
+                    {installPrompt
+                        ? <p><button onClick={install}>{t('home.pwaInstall')}</button></p>
+                        : <p><small>{t('home.pwaIos')}</small></p>
+                    }
+                </article>
+            )}
+
+            <MCPCard token={token} writingModeHorizontal={writingModeHorizontal} />
 
             <footer>
                 <p>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { ListItem } from './ListItem.ts';
 
@@ -10,6 +10,8 @@ type ErrorMessage = { type: 'error', message: string }
 
 export type WebSocketMessage = InsertMessage | TombstoneMessage | JoinMessage | InitMessage | ErrorMessage
 
+export type SyncStatus = 'connecting' | 'connected';
+
 export const useWebSocketSync = (
     url: string,
     boardId: string,
@@ -19,11 +21,13 @@ export const useWebSocketSync = (
     const ws = useRef<ReconnectingWebSocket | null>(null);
     const onMessageRef = useRef(onMessage);
     onMessageRef.current = onMessage;
+    const [status, setStatus] = useState<SyncStatus>('connecting');
 
     useEffect(() => {
         ws.current = new ReconnectingWebSocket(url);
 
         ws.current.onopen = () => {
+            setStatus('connected');
             const msg: JoinMessage = { type: 'join', boardId };
             if (token) msg.token = token;
             ws.current?.send(JSON.stringify(msg));
@@ -33,7 +37,7 @@ export const useWebSocketSync = (
             onMessageRef.current(JSON.parse(event.data));
         };
 
-        ws.current.onclose = () => console.log('disconnected');
+        ws.current.onclose = () => setStatus('connecting');
         ws.current.onerror = (e) => console.error('websocket error', e);
 
         return () => ws.current?.close();
@@ -45,5 +49,5 @@ export const useWebSocketSync = (
         }
     }, []);
 
-    return { send };
+    return { send, status };
 };

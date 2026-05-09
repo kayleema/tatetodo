@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Home } from './Home.tsx';
 import { Login } from './Login.tsx';
 import { Register } from './Register.tsx';
+import { Terms } from './Terms.tsx';
 import { AuthProvider } from './AuthContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="/register" element={<Register />} />
                     <Route path="/" element={<Home />} />
                     <Route path="/board/:boardId" element={<App />} />
+                    <Route path="/terms" element={<Terms />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
