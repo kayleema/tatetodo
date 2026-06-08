@@ -51,8 +51,11 @@ export function Home() {
         if (!token) { setBoards([]); return; }
         setLoadingBoards(true);
         fetch('/api/boards', { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(r => r.json())
-            .then(setBoards)
+            .then(r => {
+                if (r.status === 401) { logout(); navigate('/login'); return null; }
+                return r.ok ? r.json() : null;
+            })
+            .then(data => { if (data) setBoards(data); })
             .catch(() => {})
             .finally(() => setLoadingBoards(false));
     };

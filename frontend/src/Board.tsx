@@ -11,6 +11,17 @@ import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
+function isTokenExpired(token: string): boolean {
+    try {
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        const payload = JSON.parse(new TextDecoder().decode(bytes));
+        return typeof payload.exp === 'number' ? payload.exp * 1000 < Date.now() : false;
+    } catch {
+        return false;
+    }
+}
+
 const isHeading = (text: string) => text.startsWith('#') || text.startsWith('＃');
 
 export function Board({boardId}: { boardId: string }) {
@@ -73,13 +84,17 @@ export function Board({boardId}: { boardId: string }) {
     };
 
     if (unauthorized) {
+        if (token && isTokenExpired(token)) return null;
         return (
             <main style={{writingMode: 'horizontal-tb'}}>
                 <nav><strong>{t('nav.appName')}</strong></nav>
                 <article>
                     <h3>{t('board.accessDenied')}</h3>
                     <p>{t('board.accessDeniedMsg')}</p>
-                    <p><Link to="/">{t('board.backToHome')}</Link></p>
+                    <p>
+                        {!token && <><Link to="/login">{t('nav.login')}</Link> · </>}
+                        <Link to="/">{t('board.backToHome')}</Link>
+                    </p>
                 </article>
             </main>
         );
