@@ -8,7 +8,7 @@ export function FooterText() {
             {t('footer.terms')}{' '}
             <Link to="/terms">{t('footer.termsLink')}</Link>
             {' · '}
-            <a href="/privacy">{t('footer.privacyLink')}</a>
+            <a href="/privacy.html">{t('footer.privacyLink')}</a>
             {' · '}
             <a href="mailto:skypattern@protonmail.com?subject=Abuse%20Report">{t('footer.reportAbuse')}</a>
         </small></p>
