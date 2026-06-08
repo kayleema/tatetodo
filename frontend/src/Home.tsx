@@ -8,6 +8,7 @@ import {LangSwitcher} from './LangSwitcher.tsx';
 import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 import {HeroCard} from './HeroCard.tsx';
 import {MCPCard} from "./MCPCard.tsx";
+import {CheckIcon} from './CheckIcon.tsx';
 
 type BoardMeta = { boardId: string; ownerUsername: string; isPublic: boolean; createdAt: string };
 
@@ -121,7 +122,7 @@ export function Home() {
     return (
         <main style={{ writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl" }}>
             <nav>
-                <strong>{t('nav.appName')}</strong>
+                <strong><CheckIcon /> {t('nav.appName')}</strong>
                 {token
                     ? <span>{t('nav.hello', { username })}  · <a href="#" onClick={e => { e.preventDefault(); logout(); }}>{ t('nav.logout')}</a></span>
                     : <span><Link to="/login">{t('nav.login')}</Link> · <Link to="/register">{t('nav.register')}</Link></span>

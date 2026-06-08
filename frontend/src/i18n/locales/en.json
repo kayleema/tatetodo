@@ -1,6 +1,6 @@
 {
   "nav": {
-    "appName": "✅ TATETODO",
+    "appName": "TATETODO",
     "hello": "Hello, {{username}}",
     "logout": "Logout",
     "login": "Login",

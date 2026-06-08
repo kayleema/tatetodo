@@ -5,6 +5,7 @@ import { useColorScheme } from './useColorScheme.ts';
 import { useTranslation } from 'react-i18next';
 import { LangSwitcher } from './LangSwitcher.tsx';
 import { ThemeSwitcher } from './ThemeSwitcher.tsx';
+import { CheckIcon } from './CheckIcon.tsx';
 
 export function Login() {
     const { login } = useAuth();
@@ -31,7 +32,7 @@ export function Login() {
 
     return (
         <main style={{ writingMode: 'horizontal-tb' }}>
-            <nav><strong>{t('nav.appName')}</strong></nav>
+            <nav><strong><CheckIcon /> {t('nav.appName')}</strong></nav>
             <article>
                 <h3>{t('login.title')}</h3>
                 <form onSubmit={submit}>

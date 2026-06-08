@@ -256,6 +256,7 @@ nav {
     border-radius: 10px;
     border: 1px solid var(--border-primary);
     box-shadow: 0 3px 10px var(--color-shadow-inset);
+    line-height: 1;
 
     strong {
         text-wrap: nowrap;
@@ -459,11 +460,11 @@ button, .buttonLink, select {
     }
 
     &.secondary {
-        background: var(--bg-secondary);
+        background-color: var(--bg-secondary);
         border-color: var(--border-primary);
 
         &:hover {
-            background: var(--bg-primary);
+            background-color: var(--bg-primary);
             border-color: var(--border-primary);
         }
 
@@ -502,10 +503,19 @@ button, .buttonLink, select {
     }
 }
 
-select {
+select, select.secondary:hover, select.secondary:active {
     display: inline-block;
     block-size: 24px;
     appearance: none;
+    padding-inline-end: 30px;
+    position: relative;
+    color: var(--color-text);
+
+    /* Note the clean fill=currentColor without extra internal quotes */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><polygon points='0,0 10,0 5,6' fill='gray'/></svg>");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 10px) center;
+    background-size: 12px 7px;
 }
 
 fieldset {

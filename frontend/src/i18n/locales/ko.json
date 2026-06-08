@@ -1,6 +1,6 @@
 {
   "nav": {
-    "appName": "✅ TATETODO",
+    "appName": "TATETODO",
     "hello": "안녕하세요, {{username}}",
     "logout": "로그아웃",
     "login": "로그인",

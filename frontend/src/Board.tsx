@@ -8,6 +8,7 @@ import {useAuth} from "./AuthContext.tsx";
 import {useTranslation} from 'react-i18next';
 import {LangSwitcher} from './LangSwitcher.tsx';
 import {ThemeSwitcher} from './ThemeSwitcher.tsx';
+import {CheckIcon} from './CheckIcon.tsx';
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -118,7 +119,7 @@ export function Board({boardId}: { boardId: string }) {
         if (token && isTokenExpired(token)) return null;
         return (
             <main style={{writingMode: 'horizontal-tb'}}>
-                <nav><strong>{t('nav.appName')}</strong></nav>
+                <nav><strong><CheckIcon /> {t('nav.appName')}</strong></nav>
                 <article>
                     <h3>{t('board.accessDenied')}</h3>
                     <p>{t('board.accessDeniedMsg')}</p>
@@ -134,7 +135,7 @@ export function Board({boardId}: { boardId: string }) {
     return (
         <main style={{writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl"}}>
             <nav>
-                <strong>{t('nav.appName')}</strong>
+                <strong><CheckIcon /> {t('nav.appName')}</strong>
                 {token
                     ? <span>{username} · <a href="#" onClick={e => {
                         e.preventDefault();
