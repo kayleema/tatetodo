@@ -66,4 +66,14 @@ const setPublic = async (boardId: string, isPublic: boolean): Promise<void> => {
     await db.insert({ ...doc, isPublic });
 };
 
-export const BoardRepo = { createBoard, getBoard, getBoardsByUser, addMember, setPublic };
+const deleteBoard = async (boardId: string): Promise<void> => {
+    try {
+        const doc = await db.get(docId(boardId));
+        await db.destroy(doc._id, doc._rev!);
+    } catch (e: any) {
+        if (e.statusCode === 404) throw Object.assign(new Error('Board not found'), {statusCode: 404});
+        throw e;
+    }
+};
+
+export const BoardRepo = {createBoard, getBoard, getBoardsByUser, addMember, setPublic, deleteBoard};

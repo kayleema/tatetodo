@@ -35,7 +35,8 @@ export const authRouter = Router();
 authRouter.post('/register', async (req: Request, res: Response) => {
     const result = credentialsSchema.safeParse(req.body);
     if (!result.success) { res.status(400).json({ error: 'Invalid username or password (min 8 chars)' }); return; }
-    const { username, password } = result.data;
+    const { username: rawUsername, password } = result.data;
+    const username = rawUsername.toLowerCase();
     try {
         await UserRepo.createUser(username, password);
         const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '30d' });
@@ -48,7 +49,8 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 authRouter.post('/login', async (req: Request, res: Response) => {
     const result = credentialsSchema.safeParse(req.body);
     if (!result.success) { res.status(400).json({ error: 'Invalid credentials' }); return; }
-    const { username, password } = result.data;
+    const { username: rawUsername, password } = result.data;
+    const username = rawUsername.toLowerCase();
     const ok = await UserRepo.verifyPassword(username, password);
     if (!ok) { res.status(401).json({ error: 'Invalid username or password' }); return; }
     const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '30d' });

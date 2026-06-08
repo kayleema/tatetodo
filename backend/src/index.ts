@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { TodoRepo } from './todoRepo';
 import { mcpRouter } from './mcp';
 import { authRouter, authenticateJWT, verifyToken, AuthRequest } from './authRouter';
+import { oauthRouter, wellKnownHandler, protectedResourceHandler } from './oauthRouter';
 import { BoardRepo } from './boardRepo';
 import { UserRepo } from './userRepo';
 
@@ -12,6 +13,7 @@ const port = process.env.PORT || 3003;
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
@@ -20,6 +22,9 @@ export const boards = new Map<string, Set<WebSocket>>();
 
 app.get('/api/health', (_req, res) => res.send('ok'));
 
+app.get('/.well-known/oauth-authorization-server', wellKnownHandler);
+app.get('/.well-known/oauth-protected-resource', protectedResourceHandler);
+app.use('/oauth', oauthRouter);
 app.use('/api/auth', authRouter);
 app.use('/mcp', mcpRouter);
 
@@ -32,6 +37,21 @@ app.post('/api/boards', authenticateJWT, async (req: AuthRequest, res: Response)
     } catch (e: any) {
         res.status(e.statusCode ?? 500).json({ error: e.message });
     }
+});
+
+app.delete('/api/boards/:boardId', authenticateJWT, async (req: AuthRequest, res: Response) => {
+    const boardId = req.params.boardId as string;
+    const board = await BoardRepo.getBoard(boardId);
+    if (!board) {
+        res.status(404).json({error: 'Board not found'});
+        return;
+    }
+    if (board.ownerUsername !== req.user!.username) {
+        res.status(403).json({error: 'Only the owner can delete the board'});
+        return;
+    }
+    await BoardRepo.deleteBoard(boardId);
+    res.json({ok: true});
 });
 
 app.get('/api/boards', authenticateJWT, async (req: AuthRequest, res: Response) => {
@@ -67,8 +87,9 @@ app.post('/api/boards/:boardId/members', authenticateJWT, async (req: AuthReques
     const board = await BoardRepo.getBoard(boardId);
     if (!board) { res.status(404).json({ error: 'Board not found' }); return; }
     if (board.ownerUsername !== req.user!.username) { res.status(403).json({ error: 'Only the owner can add members' }); return; }
-    const { username } = req.body;
-    if (!username) { res.status(400).json({ error: 'username required' }); return; }
+    const { username: rawMember } = req.body;
+    if (!rawMember) { res.status(400).json({ error: 'username required' }); return; }
+    const username = (rawMember as string).toLowerCase();
     const user = await UserRepo.findUser(username);
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
     await BoardRepo.addMember(boardId, username);

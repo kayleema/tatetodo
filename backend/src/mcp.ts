@@ -62,71 +62,103 @@ function boardUrl(boardId: string) { return `${siteUrl}/board/${boardId}`; }
 function createMcpServer(username: string | null): McpServer {
     const server = new McpServer({ name: 'tatetodo', version: '1.0.0' });
 
-    server.tool(
+    server.registerTool(
         'create_board',
-        'Create a new board owned by the authenticated user. Requires authentication.',
-        { boardId: z.string().optional().describe('Board ID to use; omit to generate a random UUID') },
+        {
+            description: 'Create a new board owned by the authenticated user. Requires authentication.',
+            inputSchema: { boardId: z.string().optional().describe('Board ID to use; omit to generate a random UUID') },
+            outputSchema: { boardId: z.string(), url: z.string() },
+            annotations: { readOnlyHint: false, destructiveHint: false },
+        },
         async ({ boardId }) => {
             if (!username) throw new Error('Authentication required to create a board');
             const id = boardId ?? randomUUID();
             await BoardRepo.createBoard(id, username);
-            return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId: id, url: boardUrl(id) }, null, 2) }] };
+            const data = { boardId: id, url: boardUrl(id) };
+            return { structuredContent: data, content: [{ type: 'text' as const, text: `Created board "${id}" at ${boardUrl(id)}` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'get_board_info',
-        'Get metadata for a board: owner, members, public status, and its URL',
-        { boardId: z.string().describe('The board ID') },
+        {
+            description: 'Get metadata for a board: owner, members, public status, and its URL',
+            inputSchema: { boardId: z.string().describe('The board ID') },
+            outputSchema: {
+                boardId: z.string(),
+                url: z.string(),
+                ownerUsername: z.string().optional(),
+                memberUsernames: z.array(z.string()).optional(),
+                isPublic: z.boolean().optional(),
+                note: z.string().optional(),
+            },
+            annotations: { readOnlyHint: true, openWorldHint: true },
+        },
         async ({ boardId }) => {
             const denied = await checkAccess(boardId, username);
             if (denied) throw new Error(denied);
             const board = await BoardRepo.getBoard(boardId);
             if (!board) {
-                return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId, url: boardUrl(boardId), note: 'Legacy board — no ownership metadata' }, null, 2) }] };
+                const data = { boardId, url: boardUrl(boardId), note: 'Legacy board — no ownership metadata' };
+                return { structuredContent: data, content: [{ type: 'text' as const, text: `Board "${boardId}" — legacy board with no ownership metadata` }] };
             }
-            return { content: [{ type: 'text' as const, text: JSON.stringify({ boardId, url: boardUrl(boardId), ownerUsername: board.ownerUsername, memberUsernames: board.memberUsernames, isPublic: board.isPublic }, null, 2) }] };
+            const data = { boardId, url: boardUrl(boardId), ownerUsername: board.ownerUsername, memberUsernames: board.memberUsernames, isPublic: board.isPublic };
+            return { structuredContent: data, content: [{ type: 'text' as const, text: `Board "${boardId}" — owner: ${board.ownerUsername}, members: ${board.memberUsernames.join(', ') || 'none'}, public: ${board.isPublic}` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'get_board',
-        'Get all visible todo items on a board in sorted order',
-        { boardId: z.string().describe('The board ID') },
+        {
+            description: 'Get all visible todo items on a board in sorted order',
+            inputSchema: { boardId: z.string().describe('The board ID') },
+            outputSchema: { items: z.array(z.object({ uid: z.string(), text: z.string(), status: z.boolean(), afterId: z.string().optional() })) },
+            annotations: { readOnlyHint: true, openWorldHint: true },
+        },
         async ({ boardId }) => {
             const denied = await checkAccess(boardId, username);
             if (denied) throw new Error(denied);
             const visible = await getVisible(boardId);
-            return { content: [{ type: 'text' as const, text: JSON.stringify(visible.map(toDisplayItem), null, 2) }] };
+            const items = visible.map(toDisplayItem);
+            return { structuredContent: { items }, content: [{ type: 'text' as const, text: `${items.length} item(s) on board "${boardId}"` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'add_item',
-        'Add a new todo item to a board',
         {
-            boardId: z.string().describe('The board ID'),
-            text: z.string().describe('The todo item text'),
-            status: z.boolean().optional().describe('Completion status (default: false)'),
-            afterUid: z.string().optional().describe('UID of the item to insert after; omit to append at end'),
+            description: 'Add a new todo item to a board',
+            inputSchema: {
+                boardId: z.string().describe('The board ID'),
+                text: z.string().describe('The todo item text'),
+                status: z.boolean().optional().describe('Completion status (default: false)'),
+                afterUid: z.string().optional().describe('UID of the item to insert after; omit to append at end'),
+            },
+            outputSchema: { uid: z.string() },
+            annotations: { readOnlyHint: false, openWorldHint: true },
         },
         async ({ boardId, text, status = false, afterUid }) => {
             const denied = await checkAccess(boardId, username);
             if (denied) throw new Error(denied);
             const item: ListItem = { text, status, siteId, version: mcpVersion++, afterId: afterUid };
             await TodoRepo.saveListItem(boardId, item);
-            return { content: [{ type: 'text' as const, text: getUID(item) }] };
+            const uid = getUID(item);
+            return { structuredContent: { uid }, content: [{ type: 'text' as const, text: `Added item "${text}" with uid ${uid}` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'update_item',
-        'Update the text or completion status of a todo item (tombstones the old version and inserts a new one)',
         {
-            boardId: z.string().describe('The board ID'),
-            uid: z.string().describe('UID of the item to update (format: siteId:version)'),
-            text: z.string().optional().describe('New text'),
-            status: z.boolean().optional().describe('New completion status'),
+            description: 'Update the text or completion status of a todo item (tombstones the old version and inserts a new one)',
+            inputSchema: {
+                boardId: z.string().describe('The board ID'),
+                uid: z.string().describe('UID of the item to update (format: siteId:version)'),
+                text: z.string().optional().describe('New text'),
+                status: z.boolean().optional().describe('New completion status'),
+            },
+            outputSchema: { uid: z.string() },
+            annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
         },
         async ({ boardId, uid, text, status }) => {
             const denied = await checkAccess(boardId, username);
@@ -148,17 +180,22 @@ function createMcpServer(username: string | null): McpServer {
                 version: mcpVersion++,
             };
             await TodoRepo.saveListItem(boardId, newItem);
-            return { content: [{ type: 'text' as const, text: getUID(newItem) }] };
+            const newUid = getUID(newItem);
+            return { structuredContent: { uid: newUid }, content: [{ type: 'text' as const, text: `Updated item, new uid ${newUid}` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'move_item',
-        'Move a todo item to a different position in the list',
         {
-            boardId: z.string().describe('The board ID'),
-            uid: z.string().describe('UID of the item to move'),
-            afterUid: z.string().optional().describe('UID of the item to place this after; omit to move to top'),
+            description: 'Move a todo item to a different position in the list',
+            inputSchema: {
+                boardId: z.string().describe('The board ID'),
+                uid: z.string().describe('UID of the item to move'),
+                afterUid: z.string().optional().describe('UID of the item to place this after; omit to move to top'),
+            },
+            outputSchema: { uid: z.string() },
+            annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
         },
         async ({ boardId, uid, afterUid }) => {
             const denied = await checkAccess(boardId, username);
@@ -171,22 +208,27 @@ function createMcpServer(username: string | null): McpServer {
             await TodoRepo.saveTombstone(boardId, uid);
             const newItem: ListItem = { ...item, afterId: afterUid, siteId, version: mcpVersion++ };
             await TodoRepo.saveListItem(boardId, newItem);
-            return { content: [{ type: 'text' as const, text: getUID(newItem) }] };
+            const newUid = getUID(newItem);
+            return { structuredContent: { uid: newUid }, content: [{ type: 'text' as const, text: `Moved item, new uid ${newUid}` }] };
         }
     );
 
-    server.tool(
+    server.registerTool(
         'delete_item',
-        'Delete a todo item',
         {
-            boardId: z.string().describe('The board ID'),
-            uid: z.string().describe('UID of the item to delete (format: siteId:version)'),
+            description: 'Delete a todo item',
+            inputSchema: {
+                boardId: z.string().describe('The board ID'),
+                uid: z.string().describe('UID of the item to delete (format: siteId:version)'),
+            },
+            outputSchema: { deleted: z.boolean() },
+            annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
         },
         async ({ boardId, uid }) => {
             const denied = await checkAccess(boardId, username);
             if (denied) throw new Error(denied);
             await TodoRepo.saveTombstone(boardId, uid);
-            return { content: [{ type: 'text' as const, text: 'deleted' }] };
+            return { structuredContent: { deleted: true }, content: [{ type: 'text' as const, text: `Deleted item ${uid}` }] };
         }
     );
 

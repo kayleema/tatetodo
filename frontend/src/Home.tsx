@@ -26,6 +26,17 @@ async function apiCreateBoard(boardId: string | undefined, token: string): Promi
     return data.boardId;
 }
 
+async function apiDeleteBoard(boardId: string, token: string): Promise<void> {
+    const res = await fetch(`/api/boards/${boardId}`, {
+        method: 'DELETE',
+        headers: {'Authorization': `Bearer ${token}`},
+    });
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? '削除に失敗しました');
+    }
+}
+
 export function Home() {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const [writingModeHorizontal, setWritingModeHorizontal] = useState(
@@ -96,6 +107,17 @@ export function Home() {
         }
     };
 
+    const deleteBoard = async (boardId: string) => {
+        if (!token) return;
+        if (!confirm(t('home.confirmDelete', {boardId}))) return;
+        try {
+            await apiDeleteBoard(boardId, token);
+            setBoards(prev => prev.filter(b => b.boardId !== boardId));
+        } catch (e: any) {
+            alert(`ERROR ${e}`)
+        }
+    };
+
     return (
         <main style={{ writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl" }}>
             <nav>
@@ -128,6 +150,10 @@ export function Home() {
                                         e.stopPropagation();
                                         navigate(`/board/${b.boardId}`);
                                     }}>{t('home.open')}</button>
+                                    <button className="delete" onClick={async e => {
+                                        e.stopPropagation();
+                                        await deleteBoard(b.boardId);
+                                    }}>{t('board.delete')}</button>
                                 </fieldset>
                                 {b.ownerUsername !== username && (
                                     <small style={{paddingInline: '10px'}}>（{t('home.sharedBy', { owner: b.ownerUsername })}）</small>

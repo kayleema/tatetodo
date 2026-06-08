@@ -23,7 +23,8 @@
     "pwaTitle": "Install App",
     "pwaDesc": "Install TateTodo on your device for quick access — it works like a native app, even offline.",
     "pwaInstall": "Install",
-    "pwaIos": "On iPhone or iPad: tap the Share button in Safari, then choose \"Add to Home Screen\"."
+    "pwaIos": "On iPhone or iPad: tap the Share button in Safari, then choose \"Add to Home Screen\".",
+    "confirmDelete": "Delete list \"{{boardId}}\"? This cannot be undone."
   },
   "board": {
     "back": "↩︎ Back to Home",
@@ -38,6 +39,7 @@
     "edit": "Edit",
     "newTask": "Enter new task name",
     "headingHint": "Tip: start an item with # to make it a heading.",
+    "keybindingHint": "Keys: ↑↓ navigate · Enter edit · ⌘Enter save · Esc cancel",
     "add": "Add",
     "owner": "Owner",
     "members": "Members",
@@ -73,8 +75,12 @@
     "lightMode": "☀️ Light",
     "darkMode": "🌙 Dark",
     "parchmentMode": "📜 Parchment",
+    "hackerMode": "💻 Hacker",
+    "sakuraMode": "🌸 Sakura",
+    "neonMode": "🌆 Neon",
     "terms": "By using this app you agree to our",
     "termsLink": "Terms of Service.",
+    "privacyLink": "Privacy Policy",
     "reportAbuse": "Report Abuse"
   },
   "mcp": {
@@ -85,7 +91,9 @@
     "tokenWarning": "⚠️ This token is valid for 30 days. After it expires, log in again to get a new token and update your config.",
     "claudeDesktopHeading": "Claude Desktop (add to {{filename}})",
     "claudeDesktopNote": "Click your name in the lower left → Settings → Developer → Edit Config, or edit the file directly:",
-    "claudeDesktopProxy": "Claude Desktop doesn't support HTTP directly, so connect via the mcp-remote proxy (Node.js required)."
+    "claudeDesktopProxy": "Claude Desktop doesn't support HTTP directly, so connect via the mcp-remote proxy (Node.js required).",
+    "chatgptHeading": "ChatGPT",
+    "chatgptNote": "Add https://todo.kaylee.jp/mcp as a remote MCP server. ChatGPT will handle the OAuth login automatically — no token copying needed."
   },
   "lang": {
     "ja": "日本語",

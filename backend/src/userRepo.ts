@@ -23,15 +23,16 @@ const initUsersDb = async () => {
 };
 
 const createUser = async (username: string, password: string): Promise<void> => {
-    const existing = await findUser(username);
+    const key = username.toLowerCase();
+    const existing = await findUser(key);
     if (existing) throw Object.assign(new Error('Username already taken'), { statusCode: 409 });
     const passwordHash = await bcrypt.hash(password, 12);
-    await db.insert({ _id: username, passwordHash, createdAt: new Date().toISOString() });
+    await db.insert({ _id: key, passwordHash, createdAt: new Date().toISOString() });
 };
 
 const findUser = async (username: string): Promise<UserDoc | null> => {
     try {
-        return await db.get(username);
+        return await db.get(username.toLowerCase());
     } catch (e: any) {
         if (e.statusCode === 404) return null;
         throw e;

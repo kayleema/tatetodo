@@ -10,6 +10,9 @@ export function ThemeSwitcher() {
             <option value="light">{t('footer.lightMode')}</option>
             <option value="dark">{t('footer.darkMode')}</option>
             <option value="parchment">{t('footer.parchmentMode')}</option>
+            <option value="hacker">{t('footer.hackerMode')}</option>
+            <option value="sakura">{t('footer.sakuraMode')}</option>
+            <option value="neon">{t('footer.neonMode')}</option>
         </select>
     );
 }

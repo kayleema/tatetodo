@@ -1,5 +1,5 @@
 import {useTodoList} from "./useTodoList.tsx";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {getListItemUID} from "./ListItem.ts";
 import {FooterText} from "./FooterText.tsx";
 import {Link, useNavigate} from "react-router-dom";
@@ -40,6 +40,37 @@ export function Board({boardId}: { boardId: string }) {
     const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null)
     const [addMemberInput, setAddMemberInput] = useState("")
     const [memberError, setMemberError] = useState("")
+    const editTextareaRef = useRef<HTMLTextAreaElement>(null)
+    const focusUidRef = useRef<string>("")
+    const dragStartedOnHandleRef = useRef(false)
+
+    useEffect(() => {
+        if (unauthorized && token && isTokenExpired(token)) {
+            logout();
+            navigate('/login');
+        }
+    }, [logout, navigate, token, unauthorized]);
+
+    useEffect(() => {
+        const hasUnsaved = newInputText.trim() !== "" || editingId !== "";
+        if (!hasUnsaved) return;
+        const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+        window.addEventListener('beforeunload', handler);
+        return () => window.removeEventListener('beforeunload', handler);
+    }, [newInputText, editingId]);
+
+    useEffect(() => {
+        if (editingId) {
+            if (editTextareaRef.current) {
+                const el = editTextareaRef.current;
+                el.focus();
+                el.setSelectionRange(el.value.length, el.value.length);
+            }
+        } else if (focusUidRef.current) {
+            document.querySelector<HTMLTextAreaElement>(`textarea[data-uid="${focusUidRef.current}"]`)?.focus();
+            focusUidRef.current = "";
+        }
+    }, [editingId])
 
     useEffect(() => {
         const headers: Record<string, string> = {};
@@ -141,14 +172,14 @@ export function Board({boardId}: { boardId: string }) {
                             }}>
                                 <fieldset style={{flexGrow: 1}}>
                                     <textarea
-                                        ref={el => { if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }}
+                                        ref={editTextareaRef}
                                         value={editingText}
                                         onChange={(e) => setEditingText(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                                                 e.preventDefault();
                                                 if (e.metaKey || e.ctrlKey) {
-                                                    update(getListItemUID(item), {text: editingText});
+                                                    focusUidRef.current = update(getListItemUID(item), {text: editingText});
                                                     setEditingId("");
                                                 } else {
                                                     const newAfterId = update(getListItemUID(item), {text: editingText});
@@ -157,17 +188,21 @@ export function Board({boardId}: { boardId: string }) {
                                                     setEditingText("");
                                                 }
                                             } else if (e.key === 'Escape' && !e.nativeEvent.isComposing) {
+                                                focusUidRef.current = getListItemUID(item);
                                                 setEditingId("");
                                             }
                                         }}
                                     />
                                 </fieldset>
                                 <fieldset style={{flexGrow: 0, alignItems: "end"}}>
-                                    <button onClick={() => {
-                                        update(getListItemUID(item), {text: editingText});
+                                    <button className="primary" onClick={() => {
+                                        focusUidRef.current = update(getListItemUID(item), {text: editingText});
                                         setEditingId("");
                                     }}>{t('board.save')}</button>
-                                    <button onClick={() => setEditingId("")}>{t('board.cancel')}</button>
+                                    <button onClick={() => {
+                                        focusUidRef.current = getListItemUID(item);
+                                        setEditingId("");
+                                    }}>{t('board.cancel')}</button>
                                     <button
                                         onClick={() => {
                                             remove(getListItemUID(item))
@@ -196,20 +231,51 @@ export function Board({boardId}: { boardId: string }) {
                                 transition: 'padding-block-end 0.1s ease',
                             }}
                         >
-                            {!isHeading(item.text) && <input type="checkbox" checked={item.status}
-                                                                  onChange={(e) => update(getListItemUID(item), {status: e.target.checked})}/>
-                            }
+                            {!isHeading(item.text) && <input
+                                type="checkbox"
+                                checked={item.status}
+                                onChange={(e) => update(getListItemUID(item), {status: e.target.checked})}
+                            />}
                             <fieldset
+                                className="todo-drag-fieldset"
                                 draggable
-                                onDragStart={(e) => e.dataTransfer.setData("text/plain", getListItemUID(item))}
+                                onPointerDownCapture={(e) => {
+                                    dragStartedOnHandleRef.current = Boolean(
+                                        (e.target as HTMLElement).closest(".todo-drag-handle")
+                                    );
+                                }}
+                                onDragStart={(e) => {
+                                    if (!dragStartedOnHandleRef.current) {
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    e.dataTransfer.setData("text/plain", getListItemUID(item));
+                                }}
+                                onDragEnd={() => {
+                                    dragStartedOnHandleRef.current = false;
+                                }}
                             >
                                 <textarea value={isHeading(item.text) ? item.text.slice(1) : item.text} readOnly
-                                          style={{cursor: "move", flexGrow: 1}}
+                                          className="readonly-todo-textarea"
+                                          data-uid={getListItemUID(item)}
                                           onClick={() => {
                                               setEditingId(getListItemUID(item));
                                               setEditingText(item.text);
                                           }}
+                                          onKeyDown={(e) => {
+                                              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                                  e.preventDefault();
+                                                  setEditingId(getListItemUID(item));
+                                                  setEditingText(item.text);
+                                              } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                                                  e.preventDefault();
+                                                  const idx = visibleListItems.findIndex(i => getListItemUID(i) === getListItemUID(item));
+                                                  const next = visibleListItems[e.key === 'ArrowDown' ? idx + 1 : idx - 1];
+                                                  if (next) document.querySelector<HTMLTextAreaElement>(`textarea[data-uid="${getListItemUID(next)}"]`)?.focus();
+                                              }
+                                          }}
                                 />
+                                <span className="todo-drag-handle" aria-hidden="true" />
                                 <button className="secondary" onClick={() => {
                                     setEditingId(getListItemUID(item));
                                     setEditingText(item.text);
@@ -253,7 +319,7 @@ export function Board({boardId}: { boardId: string }) {
                     </fieldset>
                 </li>
             </ul>
-            <p><small>{t('board.headingHint')}</small></p>
+            <p><small>{t('board.headingHint')}</small><br/><small>{t('board.keybindingHint')}</small></p>
 
             {boardMeta && !isOwner && (
                 <article>
@@ -283,8 +349,7 @@ export function Board({boardId}: { boardId: string }) {
                     </p>}
                     <p>
                         <label>
-                            <input type="checkbox" checked={boardMeta!.isPublic} onChange={toggleShareLink}
-                                   style={{width: 'auto', flexGrow: 0}}/>
+                            <input type="checkbox" checked={boardMeta!.isPublic} onChange={toggleShareLink}/>
                             {" "}{t('board.shareLink')}
                         </label>
                     </p>

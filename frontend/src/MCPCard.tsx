@@ -58,6 +58,8 @@ export function MCPCard({token, writingModeHorizontal}: MCPCardProps) {
   }
 }`
                     }</pre>
+                    <p><strong>{t('mcp.chatgptHeading')}</strong></p>
+                    <p><small>{t('mcp.chatgptNote')}</small></p>
                 </div>
             }
         </article>

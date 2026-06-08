@@ -23,7 +23,8 @@
     "pwaTitle": "앱 설치",
     "pwaDesc": "TateTodo를 기기에 설치하면 네이티브 앱처럼 빠르게 접근할 수 있습니다. 오프라인에서도 사용 가능합니다.",
     "pwaInstall": "설치",
-    "pwaIos": "iPhone 또는 iPad의 경우: Safari에서 공유 버튼을 탭한 후 \"홈 화면에 추가\"를 선택하세요."
+    "pwaIos": "iPhone 또는 iPad의 경우: Safari에서 공유 버튼을 탭한 후 \"홈 화면에 추가\"를 선택하세요.",
+    "confirmDelete": "목록 \"{{boardId}}\"을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
   },
   "board": {
     "back": "↩︎ 홈으로 돌아가기",
@@ -38,6 +39,7 @@
     "edit": "편집",
     "newTask": "새 할 일 이름 입력",
     "headingHint": "팁: #으로 시작하면 제목이 됩니다.",
+    "keybindingHint": "단축키: ↑↓ 이동 · Enter 편집 · ⌘Enter 저장 · Esc 취소",
     "add": "추가",
     "owner": "소유자",
     "members": "멤버",
@@ -73,8 +75,12 @@
     "lightMode": "☀️ 라이트",
     "darkMode": "🌙 다크",
     "parchmentMode": "📜 파피루스",
+    "hackerMode": "💻 해커",
+    "sakuraMode": "🌸 벚꽃",
+    "neonMode": "🌆 네온",
     "terms": "본 앱을 이용함으로써 다음에 동의한 것으로 간주됩니다:",
     "termsLink": "이용약관",
+    "privacyLink": "개인정보처리방침",
     "reportAbuse": "신고하기"
   },
   "mcp": {
@@ -85,7 +91,9 @@
     "tokenWarning": "⚠️ 이 토큰은 30일간 유효합니다. 만료 후에는 다시 로그인하여 새 토큰을 받아 설정을 업데이트하세요.",
     "claudeDesktopHeading": "Claude Desktop ({{filename}}에 추가)",
     "claudeDesktopNote": "왼쪽 하단의 이름 클릭 → 설정 → 개발자 → 설정 편집, 또는 파일 직접 편집:",
-    "claudeDesktopProxy": "Claude Desktop은 HTTP를 직접 지원하지 않으므로 mcp-remote 프록시를 통해 연결합니다 (Node.js 필요)."
+    "claudeDesktopProxy": "Claude Desktop은 HTTP를 직접 지원하지 않으므로 mcp-remote 프록시를 통해 연결합니다 (Node.js 필요).",
+    "chatgptHeading": "ChatGPT",
+    "chatgptNote": "https://todo.kaylee.jp/mcp 를 원격 MCP 서버로 추가하세요. ChatGPT가 OAuth 로그인을 자동으로 처리합니다. 토큰 복사가 필요 없습니다."
   },
   "lang": {
     "ja": "日本語",
