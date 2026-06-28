@@ -4,7 +4,7 @@ import { useWebSocketSync } from "./useWebSocketSync.ts";
 
 const siteId = generateSiteId()
 
-export const useTodoList = (boardId: string) => {
+export const useTodoList = (boardId: string, userId?: string) => {
     const listItems = useRef(new Map<string, ListItem>())
     const tombstoneIds = useRef(new Set<string>())
     const version = useRef(0)
@@ -116,12 +116,27 @@ export const useTodoList = (boardId: string) => {
             const index = visibleListItems.findIndex(i => getListItemUID(i) === uid)
             const newAfterId = index <= 0 ? undefined : getListItemUID(visibleListItems[index - 1])
             dispatchTombstone(uid)
-            const newItem = { ...item, afterId: newAfterId, ...updateInfo, siteId, version: version.current++ }
+            const newItem = {
+                ...item,
+                afterId: newAfterId,
+                ...updateInfo,
+                siteId,
+                version: version.current++,
+                updatedAt: new Date().toISOString(),
+                updatedBy: userId,
+            }
             dispatchInsert(newItem)
             return getListItemUID(newItem)
         },
         insert: (newItemInput: { text: string, status: boolean, afterId?: string }) => {
-            const toInsert = { ...newItemInput, siteId, version: version.current++ }
+            const toInsert = {
+                ...newItemInput,
+                siteId,
+                version: version.current++,
+                updatedAt: new Date().toISOString(),
+                updatedBy: userId,
+                id: `${siteId}${version.current}`
+            }
             dispatchInsert(toInsert)
             return getListItemUID(toInsert)
         },

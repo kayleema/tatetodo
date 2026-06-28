@@ -9,6 +9,7 @@ import {useTranslation} from 'react-i18next';
 import {LangSwitcher} from './LangSwitcher.tsx';
 import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 import {CheckIcon} from './CheckIcon.tsx';
+import AutofitTextarea from "./AutofitTextarea.tsx";
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -172,7 +173,7 @@ export function Board({boardId}: { boardId: string }) {
                                 justifyContent: "end"
                             }}>
                                 <fieldset style={{flexGrow: 1}}>
-                                    <textarea
+                                    <AutofitTextarea
                                         ref={editTextareaRef}
                                         value={editingText}
                                         onChange={(e) => setEditingText(e.target.value)}
@@ -256,7 +257,7 @@ export function Board({boardId}: { boardId: string }) {
                                     dragStartedOnHandleRef.current = false;
                                 }}
                             >
-                                <textarea value={isHeading(item.text) ? item.text.slice(1) : item.text} readOnly
+                                <AutofitTextarea value={isHeading(item.text) ? item.text.slice(1) : item.text} readOnly
                                           className="readonly-todo-textarea"
                                           data-uid={getListItemUID(item)}
                                           onClick={() => {
@@ -288,7 +289,7 @@ export function Board({boardId}: { boardId: string }) {
                 <li className={isHeading(newInputText) ? "heading" : ""}>
                     {!isHeading(newInputText) && <input type="checkbox" disabled/>}
                     <fieldset>
-                        <textarea value={newInputText} placeholder={t('board.newTask')}
+                        <AutofitTextarea value={newInputText} placeholder={t('board.newTask')}
                                disabled={editingId !== ""}
                                onChange={(e) => setNewInputText(e.target.value)}
                                onKeyDown={(e) => {

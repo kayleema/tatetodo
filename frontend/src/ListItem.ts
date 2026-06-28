@@ -4,6 +4,11 @@ export type ListItem = {
     siteId: string,
     version: number,
     afterId?: string,
+
+    updatedAt?: string,
+    updatedBy?: string,
+    id?: string,
+    deleted?: boolean
 }
 
 export const getListItemUID = (item: ListItem) => (`${item.siteId}:${item.version}`)

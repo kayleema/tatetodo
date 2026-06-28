@@ -213,6 +213,8 @@
     --error-bg: #600;
     --error-border: #982121;
     --color-shadow-inset: #0008;
+    --bevel-light: #fff1;
+    --bevel-dark: #0004;
 }
 
 #root {
@@ -394,13 +396,6 @@ label {
     cursor: pointer;
 }
 
-textarea {
-    field-sizing: content;
-    overflow: hidden;
-    overflow-block: auto;
-    resize: none;
-}
-
 .todo-drag-handle {
     inline-size: 28px;
     flex: 0 0 28px;
@@ -506,16 +501,9 @@ button, .buttonLink, select {
 select, select.secondary:hover, select.secondary:active {
     display: inline-block;
     block-size: 24px;
-    appearance: none;
     padding-inline-end: 30px;
     position: relative;
     color: var(--color-text);
-
-    /* Note the clean fill=currentColor without extra internal quotes */
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><polygon points='0,0 10,0 5,6' fill='gray'/></svg>");
-    background-repeat: no-repeat;
-    background-position: calc(100% - 10px) center;
-    background-size: 12px 7px;
 }
 
 fieldset {
