@@ -13,6 +13,7 @@ function decodeUsername(token: string): string | null {
     try {
         const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
         const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        console.log("authinfo: ", JSON.parse(new TextDecoder().decode(bytes)))
         return JSON.parse(new TextDecoder().decode(bytes)).username ?? null;
     } catch {
         return null;

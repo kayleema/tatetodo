@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, forwardRef, TextareaHTMLAttributes, useImperativeHandle, useCallback} from 'react';
+import React, { useRef, useEffect, forwardRef, TextareaHTMLAttributes, useImperativeHandle, useCallback } from 'react';
 
 type AutofitTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
 
@@ -8,41 +8,69 @@ const AutofitTextarea = forwardRef<HTMLTextAreaElement, AutofitTextareaProps>(
 
         useImperativeHandle(ref, () => textareaRef.current!, []);
 
-        // Function to calculate and adjust the height
-        const adjustHeight = useCallback(() => {
+        // Function to calculate and adjust layout dimensions dynamically
+        const adjustSize = useCallback(() => {
             const textarea = textareaRef.current;
-            if (textarea) {
-                // 1. Reset height to 'auto' so it can shrink if text is deleted
+            if (!textarea) return;
+
+            // Detect if the component is currently rendered vertically
+            const computedStyle = window.getComputedStyle(textarea);
+            const isVertical = computedStyle.writingMode.startsWith('vertical-');
+
+            if (isVertical) {
+                // VERTICAL MODE: Auto-fit width, reset height changes
+                textarea.style.height = ''; // Let standard CSS/classes handle height
+                textarea.style.width = 'auto';
+                // Offset calculation (adjust padding/borders if necessary)
+                textarea.style.width = `${textarea.scrollWidth}px`;
+            } else {
+                // HORIZONTAL MODE: Auto-fit height, reset width changes
+                textarea.style.width = '';
                 textarea.style.height = 'auto';
-                // 2. Set height to scrollHeight (plus a tiny bit if you have borders)
                 textarea.style.height = `${textarea.scrollHeight - 8}px`;
             }
         }, []);
 
-        // re-fit when the WIDTH changes (text rewraps -> height changes)
+        // Track dimension changes depending on layout direction
         useEffect(() => {
             const el = textareaRef.current;
             if (!el) return;
+
             let prevWidth = el.offsetWidth;
+            let prevHeight = el.offsetHeight;
+
             const ro = new ResizeObserver(() => {
-                const width = el.offsetWidth;
-                if (width !== prevWidth) {     // ignore our own height mutations
-                    prevWidth = width;
-                    adjustHeight();
+                const computedStyle = window.getComputedStyle(el);
+                const isVertical = computedStyle.writingMode.startsWith('vertical-');
+
+                if (isVertical) {
+                    // In vertical mode, changing the HEIGHT causes text to re-wrap, changing width
+                    const height = el.offsetHeight;
+                    if (height !== prevHeight) {
+                        prevHeight = height;
+                        adjustSize();
+                    }
+                } else {
+                    // In horizontal mode, changing the WIDTH causes text to re-wrap, changing height
+                    const width = el.offsetWidth;
+                    if (width !== prevWidth) {
+                        prevWidth = width;
+                        adjustSize();
+                    }
                 }
             });
+
             ro.observe(el);
             return () => ro.disconnect();
-        }, [adjustHeight]);
+        }, [adjustSize]);
 
-        // Adjust height on initial mount and whenever the value changes from the outside
+        // Adjust size on initial mount and whenever value updates externally
         useEffect(() => {
-            adjustHeight();
-        }, [props.value]);
+            adjustSize();
+        }, [props.value, adjustSize]);
 
-        // Intercept the native onChange to trigger resize on typing
         const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            adjustHeight();
+            adjustSize();
             if (props.onChange) {
                 props.onChange(e);
             }
@@ -56,11 +84,12 @@ const AutofitTextarea = forwardRef<HTMLTextAreaElement, AutofitTextareaProps>(
                 rows={1}
                 style={{
                     resize: 'none',
-                    overflow: 'hidden', // Hides scrollbars for a cleaner look
+                    overflow: 'hidden', 
                     ...props.style
                 }}
             />
         );
-    });
+    }
+);
 
 export default AutofitTextarea;

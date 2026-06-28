@@ -1,6 +1,6 @@
 import {useTodoList} from "./useTodoList.tsx";
 import {useState, useEffect, useRef} from "react";
-import {getListItemUID} from "./ListItem.ts";
+import {getListItemUID, ListItem} from "./ListItem.ts";
 import {FooterText} from "./FooterText.tsx";
 import {Link, useNavigate} from "react-router-dom";
 import {useColorScheme} from "./useColorScheme.ts";
@@ -27,9 +27,9 @@ function isTokenExpired(token: string): boolean {
 const isHeading = (text: string) => text.startsWith('#') || text.startsWith('＃');
 
 export function Board({boardId}: { boardId: string }) {
-    const {visibleListItems, update, insert, remove, unauthorized, status, pendingCount} = useTodoList(boardId)
-    useColorScheme()
     const {token, username, logout} = useAuth()
+    const {visibleListItems, update, insert, remove, unauthorized, status, pendingCount, listItems} = useTodoList(boardId, username ?? undefined)
+    useColorScheme()
     const {t} = useTranslation()
     const navigate = useNavigate()
     const [editingId, setEditingId] = useState("")
@@ -116,6 +116,18 @@ export function Board({boardId}: { boardId: string }) {
         if (res.ok) setBoardMeta(m => m ? {...m, isPublic: next} : m);
     };
 
+    const onOpenHistory = (item: ListItem) => {
+        const historyItems = listItems.current 
+            ? Array.from(listItems.current.values()).filter(listItem => listItem.id === item.id)
+            : [];
+        historyItems.sort((a, b) => a.updatedAt?.localeCompare(b.updatedAt ?? "") ?? 0)
+        alert(
+            historyItems.map((historyItem) => 
+                `${historyItem.updatedAt} ${historyItem.updatedBy} 「${historyItem.text}」${historyItem.status ? "完了" : ""} ${historyItem.deleted ? "削除" : ""}`
+            ).join("\n")
+        )
+    }
+
     if (unauthorized) {
         if (token && isTokenExpired(token)) return null;
         return (
@@ -201,10 +213,11 @@ export function Board({boardId}: { boardId: string }) {
                                         focusUidRef.current = update(getListItemUID(item), {text: editingText});
                                         setEditingId("");
                                     }}>{t('board.save')}</button>
-                                    <button onClick={() => {
+                                    <button className="secondary" onClick={() => {
                                         focusUidRef.current = getListItemUID(item);
                                         setEditingId("");
                                     }}>{t('board.cancel')}</button>
+                                    <button className="secondary" onClick={() => {onOpenHistory(item)}}>履歴</button>
                                     <button
                                         onClick={() => {
                                             remove(getListItemUID(item))
