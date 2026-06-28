@@ -118,10 +118,11 @@ export function Board({boardId}: { boardId: string }) {
 
     const onOpenHistory = (item: ListItem) => {
         const historyItems = listItems.current 
-            ? Array.from(listItems.current.values()).filter(listItem => listItem.id === item.id)
+            ? Array.from(listItems.current.values()).filter(listItem => listItem.id && (listItem.id === item.id))
             : [];
         historyItems.sort((a, b) => a.updatedAt?.localeCompare(b.updatedAt ?? "") ?? 0)
         alert(
+            "履歴：\n" + 
             historyItems.map((historyItem) => 
                 `${historyItem.updatedAt} ${historyItem.updatedBy} 「${historyItem.text}」${historyItem.status ? "完了" : ""} ${historyItem.deleted ? "削除" : ""}`
             ).join("\n")

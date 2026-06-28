@@ -124,6 +124,7 @@ export const useTodoList = (boardId: string, userId?: string) => {
                 version: version.current++,
                 updatedAt: new Date().toISOString(),
                 updatedBy: userId,
+                id: item.id ?? `${siteId}${version.current}`
             }
             dispatchInsert(newItem)
             return getListItemUID(newItem)
