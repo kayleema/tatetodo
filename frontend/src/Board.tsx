@@ -10,6 +10,7 @@ import {LangSwitcher} from './LangSwitcher.tsx';
 import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 import {CheckIcon} from './CheckIcon.tsx';
 import AutofitTextarea from "./AutofitTextarea.tsx";
+import {ChatPanel} from "./ChatPanel.tsx";
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -42,6 +43,7 @@ export function Board({boardId}: { boardId: string }) {
     const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null)
     const [addMemberInput, setAddMemberInput] = useState("")
     const [memberError, setMemberError] = useState("")
+    const [showChat, setShowChat] = useState(false)
     const editTextareaRef = useRef<HTMLTextAreaElement>(null)
     const focusUidRef = useRef<string>("")
     const dragStartedOnHandleRef = useRef(false)
@@ -147,6 +149,7 @@ export function Board({boardId}: { boardId: string }) {
     }
 
     return (
+        <>
         <main style={{writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl"}}>
             <nav>
                 <strong><CheckIcon /> {t('nav.appName')}</strong>
@@ -214,7 +217,7 @@ export function Board({boardId}: { boardId: string }) {
                                         focusUidRef.current = update(getListItemUID(item), {text: editingText});
                                         setEditingId("");
                                     }}>{t('board.save')}</button>
-                                    <button className="secondary" onClick={() => {
+                                    <button className="warn" onClick={() => {
                                         focusUidRef.current = getListItemUID(item);
                                         setEditingId("");
                                     }}>{t('board.cancel')}</button>
@@ -383,6 +386,8 @@ export function Board({boardId}: { boardId: string }) {
                         return next;
                     })}>{t('footer.toggleWritingMode')}</button>
                     {" · "}
+                    <button className="secondary" onClick={() => setShowChat(v => !v)}>{t('chat.toggle')}</button>
+                    {" · "}
                     <ThemeSwitcher />
                     {" · "}
                     <LangSwitcher/>
@@ -392,5 +397,7 @@ export function Board({boardId}: { boardId: string }) {
                 <FooterText/>
             </footer>
         </main>
+        {showChat && <ChatPanel boardId={boardId} onClose={() => setShowChat(false)}/>}
+        </>
     )
 }

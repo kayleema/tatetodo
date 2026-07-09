@@ -59,7 +59,7 @@ const siteUrl = (process.env.SITE_URL ?? 'http://localhost:3003').replace(/\/$/,
 
 function boardUrl(boardId: string) { return `${siteUrl}/board/${boardId}`; }
 
-function createMcpServer(username: string | null): McpServer {
+export function createMcpServer(username: string | null): McpServer {
     const server = new McpServer({ name: 'tatetodo', version: '1.0.0' });
 
     server.registerTool(

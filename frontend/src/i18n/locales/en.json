@@ -54,6 +54,16 @@
     "backToHome": "Back to Home",
     "motivational": "Great work today! It's okay if not every task is done. What matters is making a little progress every day. Wishing you a wonderful tomorrow."
   },
+  "chat": {
+    "toggle": "AI Chat",
+    "title": "AI Assistant",
+    "close": "Close",
+    "placeholder": "Ask the AI to add, edit, or organize your tasks…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "empty": "Ask me to add, edit, move, or delete items on this list.",
+    "error": "Something went wrong. Please try again."
+  },
   "login": {
     "title": "Login",
     "usernamePlaceholder": "Username",

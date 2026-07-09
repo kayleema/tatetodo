@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { TodoRepo } from './todoRepo';
 import { mcpRouter } from './mcp';
+import { chatRouter } from './chatRouter';
 import { authRouter, authenticateJWT, verifyToken, AuthRequest } from './authRouter';
 import { oauthRouter, wellKnownHandler, protectedResourceHandler } from './oauthRouter';
 import { BoardRepo } from './boardRepo';
@@ -27,6 +28,7 @@ app.get('/.well-known/oauth-protected-resource', protectedResourceHandler);
 app.use('/oauth', oauthRouter);
 app.use('/api/auth', authRouter);
 app.use('/mcp', mcpRouter);
+app.use('/api/chat', chatRouter);
 
 app.post('/api/boards', authenticateJWT, async (req: AuthRequest, res: Response) => {
     const { boardId } = req.body;
