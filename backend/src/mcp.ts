@@ -112,7 +112,16 @@ export function createMcpServer(username: string | null): McpServer {
         {
             description: 'Get all visible todo items on a board in sorted order',
             inputSchema: { boardId: z.string().describe('The board ID') },
-            outputSchema: { items: z.array(z.object({ uid: z.string(), text: z.string(), status: z.boolean(), afterId: z.string().optional() })) },
+            outputSchema: { items: z.array(z.object({
+                uid: z.string(),
+                text: z.string(),
+                status: z.boolean(),
+                afterId: z.string().optional(),
+                updatedAt: z.string().optional(),
+                updatedBy: z.string().optional(),
+                id: z.string().optional(),
+                deleted: z.boolean().optional(),
+            })) },
             annotations: { readOnlyHint: true, openWorldHint: true },
         },
         async ({ boardId }) => {
@@ -140,7 +149,13 @@ export function createMcpServer(username: string | null): McpServer {
         async ({ boardId, text, status = false, afterUid }) => {
             const denied = await checkAccess(boardId, username);
             if (denied) throw new Error(denied);
-            const item: ListItem = { text, status, siteId, version: mcpVersion++, afterId: afterUid };
+            const version = mcpVersion++;
+            const item: ListItem = {
+                text, status, siteId, version, afterId: afterUid,
+                updatedAt: new Date().toISOString(),
+                updatedBy: username ?? undefined,
+                id: `${siteId}${version}`,
+            };
             await TodoRepo.saveListItem(boardId, item);
             const uid = getUID(item);
             return { structuredContent: { uid }, content: [{ type: 'text' as const, text: `Added item "${text}" with uid ${uid}` }] };
@@ -171,13 +186,17 @@ export function createMcpServer(username: string | null): McpServer {
             const item = sorted[index];
             const newAfterId = index === 0 ? undefined : getUID(sorted[index - 1]);
             await TodoRepo.saveTombstone(boardId, uid);
+            const version = mcpVersion++;
             const newItem: ListItem = {
                 ...item,
                 afterId: newAfterId,
                 ...(text !== undefined && { text }),
                 ...(status !== undefined && { status }),
                 siteId,
-                version: mcpVersion++,
+                version,
+                updatedAt: new Date().toISOString(),
+                updatedBy: username ?? undefined,
+                id: item.id ?? `${siteId}${version}`,
             };
             await TodoRepo.saveListItem(boardId, newItem);
             const newUid = getUID(newItem);
@@ -206,7 +225,16 @@ export function createMcpServer(username: string | null): McpServer {
             const item = sorted.find(i => getUID(i) === uid);
             if (!item) throw new Error(`Item ${uid} not found on board ${boardId}`);
             await TodoRepo.saveTombstone(boardId, uid);
-            const newItem: ListItem = { ...item, afterId: afterUid, siteId, version: mcpVersion++ };
+            const version = mcpVersion++;
+            const newItem: ListItem = {
+                ...item,
+                afterId: afterUid,
+                siteId,
+                version,
+                updatedAt: new Date().toISOString(),
+                updatedBy: username ?? undefined,
+                id: item.id ?? `${siteId}${version}`,
+            };
             await TodoRepo.saveListItem(boardId, newItem);
             const newUid = getUID(newItem);
             return { structuredContent: { uid: newUid }, content: [{ type: 'text' as const, text: `Moved item, new uid ${newUid}` }] };

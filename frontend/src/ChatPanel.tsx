@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {useTranslation} from 'react-i18next';
 import {useAuth} from "./AuthContext.tsx";
 import {Mascot} from "./Mascot.tsx";
+import AutofitTextarea from "./AutofitTextarea.tsx";
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
@@ -64,7 +65,7 @@ export function ChatPanel({boardId, onClose}: { boardId: string; onClose: () => 
                 {loading && <mark className="chat-thinking animate">{t('chat.thinking')}</mark>}
             </div>
             <fieldset className="chat-panel-input">
-                <textarea
+                <AutofitTextarea
                     value={input}
                     placeholder={t('chat.placeholder')}
                     disabled={loading}

@@ -11,6 +11,7 @@ import {ThemeSwitcher} from './ThemeSwitcher.tsx';
 import {CheckIcon} from './CheckIcon.tsx';
 import AutofitTextarea from "./AutofitTextarea.tsx";
 import {ChatPanel} from "./ChatPanel.tsx";
+import {Mascot} from "./Mascot.tsx";
 
 type BoardMeta = { ownerUsername: string; memberUsernames: string[]; isPublic: boolean };
 
@@ -119,14 +120,20 @@ export function Board({boardId}: { boardId: string }) {
     };
 
     const onOpenHistory = (item: ListItem) => {
-        const historyItems = listItems.current 
+        const historyItems = listItems.current
             ? Array.from(listItems.current.values()).filter(listItem => listItem.id && (listItem.id === item.id))
             : [];
         historyItems.sort((a, b) => a.updatedAt?.localeCompare(b.updatedAt ?? "") ?? 0)
         alert(
-            "履歴：\n" + 
-            historyItems.map((historyItem) => 
-                `${historyItem.updatedAt} ${historyItem.updatedBy} 「${historyItem.text}」${historyItem.status ? "完了" : ""} ${historyItem.deleted ? "削除" : ""}`
+            t('board.historyTitle') + "\n" +
+            historyItems.map((historyItem) =>
+                t('board.historyLine', {
+                    updatedAt: historyItem.updatedAt ?? "",
+                    updatedBy: historyItem.updatedBy ?? "",
+                    text: historyItem.text,
+                    status: historyItem.status ? t('board.historyDone') : "",
+                    deleted: historyItem.deleted ? t('board.historyDeleted') : "",
+                })
             ).join("\n")
         )
     }
@@ -150,7 +157,11 @@ export function Board({boardId}: { boardId: string }) {
 
     return (
         <>
-        <main style={{writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl"}}>
+        <main style={{
+            writingMode: writingModeHorizontal ? "horizontal-tb" : "vertical-rl",
+            marginLeft: showChat ? 0 : "auto",
+            marginRight: showChat ? "min(380px, 100vw)" : "auto",
+        }}>
             <nav>
                 <strong><CheckIcon /> {t('nav.appName')}</strong>
                 {token
@@ -221,7 +232,7 @@ export function Board({boardId}: { boardId: string }) {
                                         focusUidRef.current = getListItemUID(item);
                                         setEditingId("");
                                     }}>{t('board.cancel')}</button>
-                                    <button className="secondary" onClick={() => {onOpenHistory(item)}}>履歴</button>
+                                    <button className="secondary" onClick={() => {onOpenHistory(item)}}>{t('board.history')}</button>
                                     <button
                                         onClick={() => {
                                             remove(getListItemUID(item))
@@ -386,7 +397,7 @@ export function Board({boardId}: { boardId: string }) {
                         return next;
                     })}>{t('footer.toggleWritingMode')}</button>
                     {" · "}
-                    <button className="secondary" onClick={() => setShowChat(v => !v)}>{t('chat.toggle')}</button>
+                    <button className="secondary" onClick={() => setShowChat(v => !v)}><Mascot size="1.3em"/> {t('chat.toggle')}</button>
                     {" · "}
                     <ThemeSwitcher />
                     {" · "}

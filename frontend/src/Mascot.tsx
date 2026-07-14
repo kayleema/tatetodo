@@ -5,7 +5,7 @@ export function Mascot({ size = '2.5em', className }: { size?: string | number; 
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
             className={`mascot ${className ?? ''}`.trim()}
-            style={{ width: size, height: size, display: 'inline-block', flexShrink: 0 }}
+            style={{ width: size, height: size, verticalAlign: '-0.35em', display: 'inline-block', flexShrink: 0 }}
         >
             {/* little antenna */}
             <line x1="32" y1="11" x2="32" y2="16" stroke="var(--primary-border)" strokeWidth="2" strokeLinecap="round" />
